@@ -30,6 +30,9 @@ function App() {
   const [data, setData] = useState<MatrixResponse | null>(null)
   const [saving, setSaving] = useState(false)
   const [saveMsg, setSaveMsg] = useState<string>('')
+  const [selected, setSelected] = useState<{ grp: string; element: string } | null>(null)
+  const [suggestions, setSuggestions] = useState<Array<{ id: number; price_id: number; price_name?: string; price_unit?: string; price_category?: string; score?: number }>>([])
+  const [loadingSug, setLoadingSug] = useState(false)
 
   useEffect(() => {
     loadMatrixAuto()
@@ -75,6 +78,22 @@ function App() {
     segs.push({ group: current, start, length: data.rows.length - start })
     return segs
   }, [data])
+
+  useEffect(() => {
+    if (!selected) return
+    const { grp, element } = selected
+    setLoadingSug(true)
+    fetch(`http://localhost:3001/api/mapping/elements?grp=${encodeURIComponent(grp)}&element=${encodeURIComponent(element)}&axis=row&limit=12`)
+      .then((r) => r.json())
+      .then((j) => {
+        const arr = (j?.suggestions || []) as any[]
+        setSuggestions(
+          arr.map((s) => ({ id: s.id, price_id: s.price_id, price_name: s.price_name, price_unit: s.price_unit, price_category: s.price_category, score: s.score }))
+        )
+      })
+      .catch((e) => console.error(e))
+      .finally(() => setLoadingSug(false))
+  }, [selected])
 
   const onSaveDisciplines = async () => {
     setSaving(true)
@@ -146,7 +165,7 @@ function App() {
                             <th className="row-group" rowSpan={rseg.length}>{rseg.group}</th>
                           )}
                           <th className="row-header">
-                            <div className="label">{r.label}</div>
+                            <div className="label" style={{ cursor: 'pointer' }} onClick={() => setSelected({ grp: rseg.group, element: r.label })}>{r.label}</div>
                           </th>
                           {colSegments.map((cseg, csi) => (
                             <Fragment key={`cs-${csi}`}>
@@ -179,6 +198,41 @@ function App() {
           <div className="summary">
             Строк: {rowCount} · Колонок: {colCount}
           </div>
+          {selected && (
+            <div className="suggestions">
+              <div className="sug-head">
+                Ранжирование прайса: <b>{selected.grp}</b> → <b>{selected.element}</b>
+                {loadingSug && <span className="sub"> Загрузка…</span>}
+              </div>
+              <table className="sug-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Наименование</th>
+                    <th>Ед.</th>
+                    <th>Категория</th>
+                    <th>Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {suggestions.map((s) => (
+                    <tr key={s.id}>
+                      <td>{s.price_id}</td>
+                      <td>{s.price_name || '—'}</td>
+                      <td>{s.price_unit || '—'}</td>
+                      <td>{s.price_category || '—'}</td>
+                      <td>{typeof s.score === 'number' ? s.score.toFixed(2) : '—'}</td>
+                    </tr>
+                  ))}
+                  {!loadingSug && suggestions.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="sub">Нет данных для выбранного элемента</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
         </>
       ) : (
         <div className="loading">Загрузка матрицы…</div>

@@ -142,3 +142,26 @@
 .loading {
   opacity: 0.7;
 }
+
+/* Per-element ranking panel */
+.suggestions {
+  margin-top: 16px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.sug-head {
+  background: #f9f9f9;
+  padding: 8px 10px;
+  font-size: 0.95rem;
+}
+.sug-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.sug-table th, .sug-table td {
+  border: 1px solid #eee;
+  padding: 6px 8px;
+  text-align: left;
+}

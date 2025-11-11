@@ -11,10 +11,9 @@ export type MatrixData = {
 }
 
 export function loadMatrixFromCsv(): MatrixData {
-  const csvPath = path.resolve(
-    __dirname,
-    '../../example/Матрица коллизий v2 - Лист1.csv'
-  )
+  const frontendCsv = path.resolve(__dirname, '../../frontend/public/matrix.csv')
+  const exampleCsv = path.resolve(__dirname, '../../example/Матрица коллизий v2 - Лист1.csv')
+  const csvPath = fs.existsSync(frontendCsv) ? frontendCsv : exampleCsv
   const csv = fs.readFileSync(csvPath, 'utf8')
   const records: string[][] = parse(csv, {
     skip_empty_lines: false,

@@ -1,9 +1,11 @@
 import express from 'express'
 import cors from 'cors'
 import path from 'path'
-import { initDB, insertDiscipline, getDisciplines, bulkInsertPrices, getPrices } from './db'
+import { initDB, insertDiscipline, getDisciplines, bulkInsertPrices, getPrices, getMappingSuggestions, getElementSuggestions } from './db'
 import { scrapeGarantPrices } from './scrapeGarant'
 import { loadMatrixFromCsv, extractDisciplineGroups } from './matrix'
+import { buildSuggestions } from './mapping'
+import { buildElementSuggestions } from './elementMapping'
 
 const app = express()
 app.use(cors({ origin: [/^http:\/\/localhost:\d+$/] }))
@@ -71,6 +73,54 @@ app.get('/api/disciplines', async (req, res) => {
     res.json({ disciplines: all })
   } catch (e: any) {
     res.status(500).json({ error: e?.message || 'Failed to read disciplines' })
+  }
+})
+
+app.post('/api/mapping/suggest', async (req, res) => {
+  try {
+    const matrix = loadMatrixFromCsv()
+    const { rowGroups, colGroups } = extractDisciplineGroups(matrix)
+    const disciplines = Array.from(new Set([...(rowGroups || []), ...(colGroups || [])])).filter(Boolean)
+    const prices = await getPrices(10000)
+    const { count, byDiscipline } = await buildSuggestions(disciplines, prices, 10)
+    res.json({ ok: true, count, disciplines: Object.keys(byDiscipline) })
+  } catch (e: any) {
+    res.status(500).json({ ok: false, error: e?.message || 'Failed to build mapping suggestions' })
+  }
+})
+
+app.get('/api/mapping', async (req, res) => {
+  try {
+    const discipline = typeof req.query.discipline === 'string' ? req.query.discipline : undefined
+    const limit = req.query.limit ? Number(req.query.limit) : 50
+    const rows = await getMappingSuggestions(discipline, limit)
+    res.json({ ok: true, suggestions: rows, total: rows.length })
+  } catch (e: any) {
+    res.status(500).json({ ok: false, error: e?.message || 'Failed to read mapping suggestions' })
+  }
+})
+
+app.post('/api/mapping/elements/suggest', async (req, res) => {
+  try {
+    const matrix = loadMatrixFromCsv()
+    const prices = await getPrices(10000)
+    const { count, elements } = await buildElementSuggestions(matrix, prices, 8)
+    res.json({ ok: true, count, elements })
+  } catch (e: any) {
+    res.status(500).json({ ok: false, error: e?.message || 'Failed to build element suggestions' })
+  }
+})
+
+app.get('/api/mapping/elements', async (req, res) => {
+  try {
+    const grp = typeof req.query.grp === 'string' ? req.query.grp : undefined
+    const element = typeof req.query.element === 'string' ? req.query.element : undefined
+    const axis = typeof req.query.axis === 'string' ? (req.query.axis === 'row' ? 'row' : req.query.axis === 'col' ? 'col' : undefined) : undefined
+    const limit = req.query.limit ? Number(req.query.limit) : 50
+    const rows = await getElementSuggestions({ grp, element, axis }, limit)
+    res.json({ ok: true, suggestions: rows, total: rows.length })
+  } catch (e: any) {
+    res.status(500).json({ ok: false, error: e?.message || 'Failed to read element suggestions' })
   }
 })
 
