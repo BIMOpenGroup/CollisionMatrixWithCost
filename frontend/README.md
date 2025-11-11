@@ -2,6 +2,24 @@
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
+## Источник данных матрицы
+
+Фронтенд умеет работать без бэкенда и поддерживает три режима источника данных:
+
+- `baked` — статически запечённый JSON: `src/assets/baked-matrix.json`.
+- `csv` — CSV из `public/matrix.csv`, парсится в браузере.
+- `api` — запрос к бэкенду `http://localhost:3001/api/matrix`.
+
+Переключение источника выполняется через query-параметр страницы:
+
+- `http://localhost:5173/?source=baked`
+- `http://localhost:5173/?source=csv`
+- `http://localhost:5173/?source=api`
+
+По умолчанию используется `baked`.
+
+Это позволяет «запечь» все подсчитанные данные в SPA без обращения к серверу.
+
 Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
@@ -71,3 +89,4 @@ export default defineConfig([
   },
 ])
 ```
+# React + Vite
