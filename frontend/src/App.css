@@ -46,10 +46,19 @@
   text-overflow: ellipsis;
 }
 .matrix thead th {
+  background: #f9f9f9;
+}
+.matrix thead tr.head-groups th {
   position: sticky;
   top: 0;
+  background: #fff;
+  z-index: 6;
+}
+.matrix thead tr.head-labels th {
+  position: sticky;
+  top: 34px; /* высота первой строки шапки */
   background: #f9f9f9;
-  z-index: 4;
+  z-index: 5;
 }
 .matrix .sticky {
   position: sticky;
@@ -59,11 +68,20 @@
 }
 .row-header {
   position: sticky;
-  left: 0;
+  left: 60px; /* рядом с колонкой групп */
   z-index: 5;
   background: #fff;
   text-align: left;
   min-width: 200px;
+}
+.row-group {
+  position: sticky;
+  left: 0;
+  z-index: 6;
+  background: #fff;
+  text-align: center;
+  min-width: 60px;
+  font-weight: 600;
 }
 .col-header {
   min-width: 140px;
@@ -74,6 +92,46 @@
 .sub {
   font-size: 0.8rem;
   color: #666;
+}
+.group-header {
+  text-align: center;
+  font-weight: 700;
+}
+.corner {
+  position: sticky;
+  left: 0;
+  z-index: 7;
+  background: #fff;
+}
+.element-header {
+  position: sticky;
+  left: 60px; /* ширина колонки групп */
+  z-index: 6;
+  background: #fff;
+}
+.matrix .col-sep {
+  width: 8px;
+  min-width: 8px;
+  padding: 0;
+  border: none !important;
+  /* Две вертикальные линии толщиной 2px, как у горизонтальных */
+  background: linear-gradient(
+    to right,
+    #cfcfcf 0,
+    #cfcfcf 2px,
+    #fff 2px,
+    #fff calc(100% - 2px),
+    #cfcfcf calc(100% - 2px),
+    #cfcfcf 100%
+  );
+}
+.row-sep td {
+  padding: 0;
+  height: 8px; /* высота горизонтального разрыва */
+  border: none;
+  border-top: 2px solid #cfcfcf;
+  border-bottom: 2px solid #cfcfcf;
+  background: #fff;
 }
 .cell {
   text-align: center;
