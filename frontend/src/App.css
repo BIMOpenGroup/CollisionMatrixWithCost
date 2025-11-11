@@ -1,0 +1,86 @@
+#root {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.meta {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.save-msg {
+  font-size: 0.95rem;
+}
+
+.matrix-wrap {
+  overflow: auto;
+  max-width: 100%;
+}
+
+.matrix {
+  border-collapse: collapse;
+  width: max-content;
+  min-width: 100%;
+  table-layout: auto;
+  font-size: 0.9rem;
+}
+.matrix th, .matrix td {
+  border: 1px solid #ddd;
+  padding: 6px;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.matrix thead th {
+  position: sticky;
+  top: 0;
+  background: #f9f9f9;
+  z-index: 4;
+}
+.matrix .sticky {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  background: #f9f9f9;
+}
+.row-header {
+  position: sticky;
+  left: 0;
+  z-index: 5;
+  background: #fff;
+  text-align: left;
+  min-width: 200px;
+}
+.col-header {
+  min-width: 140px;
+}
+.label {
+  font-weight: 600;
+}
+.sub {
+  font-size: 0.8rem;
+  color: #666;
+}
+.cell {
+  text-align: center;
+  color: #202020;
+  position: relative;
+  z-index: 1;
+}
+.loading {
+  opacity: 0.7;
+}
