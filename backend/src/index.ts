@@ -1,7 +1,8 @@
 import express from 'express'
 import cors from 'cors'
 import path from 'path'
-import { initDB, insertDiscipline, getDisciplines } from './db'
+import { initDB, insertDiscipline, getDisciplines, bulkInsertPrices, getPrices } from './db'
+import { scrapeGarantPrices } from './scrapeGarant'
 import { loadMatrixFromCsv, extractDisciplineGroups } from './matrix'
 
 const app = express()
@@ -21,6 +22,26 @@ app.get('/api/matrix', (req, res) => {
     })
   } catch (e: any) {
     res.status(500).json({ error: e?.message || 'Failed to load matrix' })
+  }
+})
+
+app.post('/api/prices/scrape', async (req, res) => {
+  try {
+    const rows = await scrapeGarantPrices()
+    const inserted = await bulkInsertPrices(rows)
+    res.json({ scraped: rows.length, inserted })
+  } catch (e: any) {
+    res.status(500).json({ error: e?.message || 'Failed to scrape prices' })
+  }
+})
+
+app.get('/api/prices', async (req, res) => {
+  try {
+    const limit = req.query.limit ? Number(req.query.limit) : 100
+    const rows = await getPrices(limit)
+    res.json({ prices: rows, total: rows.length })
+  } catch (e: any) {
+    res.status(500).json({ error: e?.message || 'Failed to read prices' })
   }
 })
 
