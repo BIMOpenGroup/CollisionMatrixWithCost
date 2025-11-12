@@ -1,11 +1,13 @@
 import express from 'express'
 import cors from 'cors'
 import path from 'path'
-import { initDB, insertDiscipline, getDisciplines, bulkInsertPrices, getPrices, getMappingSuggestions, getElementSuggestions } from './db'
+import fs from 'fs'
+import { initDB, insertDiscipline, getDisciplines, bulkInsertPrices, getPrices, getMappingSuggestions, getElementSuggestions, db } from './db'
 import { scrapeGarantPrices } from './scrapeGarant'
 import { loadMatrixFromCsv, extractDisciplineGroups } from './matrix'
 import { buildSuggestions } from './mapping'
 import { buildElementSuggestions } from './elementMapping'
+import { chatCompletionOpenAICompatible, llmRerank } from './llm'
 
 const app = express()
 app.use(cors({ origin: [/^http:\/\/localhost:\d+$/] }))
@@ -121,6 +123,136 @@ app.get('/api/mapping/elements', async (req, res) => {
     res.json({ ok: true, suggestions: rows, total: rows.length })
   } catch (e: any) {
     res.status(500).json({ ok: false, error: e?.message || 'Failed to read element suggestions' })
+  }
+})
+
+// ===== Debug endpoints =====
+
+app.get('/api/debug/llm/providers', (req, res) => {
+  try {
+    const mistralKey = process.env.MISTRAL_API_KEY
+    const openaiKey = process.env.OPENAI_API_KEY
+    const providers: Array<{ name: string; baseUrl: string; model: string; apiKeyPresent: boolean }> = []
+    if (mistralKey) {
+      providers.push({
+        name: 'mistral',
+        baseUrl: process.env.MISTRAL_BASE_URL || 'https://api.mistral.ai/v1',
+        model: process.env.MISTRAL_MODEL || 'mistral-small-latest',
+        apiKeyPresent: true,
+      })
+    } else {
+      providers.push({
+        name: 'mistral',
+        baseUrl: process.env.MISTRAL_BASE_URL || 'https://api.mistral.ai/v1',
+        model: process.env.MISTRAL_MODEL || 'mistral-small-latest',
+        apiKeyPresent: false,
+      })
+    }
+    if (openaiKey) {
+      providers.push({
+        name: 'openai',
+        baseUrl: process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1',
+        model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+        apiKeyPresent: true,
+      })
+    } else {
+      providers.push({
+        name: 'openai',
+        baseUrl: process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1',
+        model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+        apiKeyPresent: false,
+      })
+    }
+    res.json({ ok: true, llmDebugEnabled: process.env.LLM_DEBUG === '1', providers })
+  } catch (e: any) {
+    res.status(500).json({ ok: false, error: e?.message || 'Failed to read LLM providers' })
+  }
+})
+
+app.post('/api/debug/llm/ping', async (req, res) => {
+  try {
+    const body = typeof req.body === 'object' && req.body ? req.body : {}
+    const providerPref = typeof body.provider === 'string' ? body.provider : undefined
+    const message = typeof body.message === 'string' ? body.message : 'test'
+    const temperature = typeof body.temperature === 'number' ? body.temperature : 0.1
+
+    const mistralKey = process.env.MISTRAL_API_KEY
+    const openaiKey = process.env.OPENAI_API_KEY
+    const providers: Array<{ name: 'mistral' | 'openai'; baseUrl: string; apiKey: string; model: string }> = []
+    if (mistralKey) providers.push({ name: 'mistral', baseUrl: process.env.MISTRAL_BASE_URL || 'https://api.mistral.ai/v1', apiKey: mistralKey, model: process.env.MISTRAL_MODEL || 'mistral-small-latest' })
+    if (openaiKey) providers.push({ name: 'openai', baseUrl: process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1', apiKey: openaiKey, model: process.env.OPENAI_MODEL || 'gpt-4o-mini' })
+
+    let chosen = providers[0]
+    if (providerPref) {
+      const found = providers.find((p) => p.name === providerPref)
+      if (found) chosen = found
+    }
+    if (!chosen) return res.status(400).json({ ok: false, error: 'No LLM provider available (missing API keys)' })
+
+    const content = await chatCompletionOpenAICompatible({
+      baseUrl: chosen.baseUrl,
+      apiKey: chosen.apiKey,
+      model: chosen.model,
+      temperature,
+      messages: [
+        { role: 'system', content: 'Ответь строго JSON объектом вида {"pong":true,"echo":"..."}.' },
+        { role: 'user', content: message },
+      ],
+    })
+
+    res.json({ ok: true, provider: chosen.name, baseUrl: chosen.baseUrl, model: chosen.model, content })
+  } catch (e: any) {
+    res.status(500).json({ ok: false, error: e?.message || 'LLM ping failed' })
+  }
+})
+
+app.post('/api/debug/llm/rerank', async (req, res) => {
+  try {
+    const body = typeof req.body === 'object' && req.body ? req.body : {}
+    const discipline: string | undefined = typeof body.discipline === 'string' ? body.discipline : undefined
+    const candidates: Array<{ name: string; unit?: string; category?: string }> = Array.isArray(body.candidates) ? body.candidates : []
+    if (!discipline || !candidates.length) return res.status(400).json({ ok: false, error: 'Required: { discipline: string, candidates: [{name, unit?, category?}] }' })
+    const result = await llmRerank(discipline, candidates)
+    res.json({ ok: true, discipline, candidates, result })
+  } catch (e: any) {
+    res.status(500).json({ ok: false, error: e?.message || 'LLM rerank failed' })
+  }
+})
+
+app.get('/api/debug/logs/llm', (req, res) => {
+  try {
+    const limit = req.query.limit ? Number(req.query.limit) : 200
+    const logPath = path.resolve(__dirname, '../logs/llm.log')
+    if (!fs.existsSync(logPath)) return res.json({ ok: true, lines: [], totalLines: 0 })
+    const raw = fs.readFileSync(logPath, 'utf-8')
+    const lines = raw.split(/\r?\n/)
+    const tail = lines.slice(Math.max(0, lines.length - limit))
+    res.json({ ok: true, lines: tail, totalLines: lines.length, returned: tail.length })
+  } catch (e: any) {
+    res.status(500).json({ ok: false, error: e?.message || 'Failed to read LLM logs' })
+  }
+})
+
+function countTable(name: string): Promise<number> {
+  return new Promise((resolve, reject) => {
+    db.get(`SELECT COUNT(*) AS c FROM ${name}`, (err: any, row: any) => {
+      if (err) return reject(err)
+      resolve(Number(row?.c || 0))
+    })
+  })
+}
+
+app.get('/api/debug/db/counts', async (req, res) => {
+  try {
+    const [disciplinesCount, pricesCount, mappingCount, elementsCount] = await Promise.all([
+      countTable('disciplines'),
+      countTable('prices'),
+      countTable('mapping_suggestions'),
+      countTable('element_suggestions'),
+    ])
+    res.json({ ok: true, counts: { disciplines: disciplinesCount, prices: pricesCount, mapping_suggestions: mappingCount, element_suggestions: elementsCount } })
+  } catch (e: any) {
+    res.status(500).json({ ok: false, error: e?.message || 'Failed to read DB counts' })
   }
 })
 

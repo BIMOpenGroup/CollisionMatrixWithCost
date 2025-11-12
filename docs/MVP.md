@@ -102,7 +102,34 @@
 - [x] Алгоритм интерпритации с использованием LLM запросов, для сопоставления дисциплин матрицы с данными garantstroikompleks
 
 ### Этап 1.2
-- [ ] Реализация через АПИ Мистраль https://docs.mistral.ai/api
+- [x] Реализация через АПИ Мистраль https://docs.mistral.ai/api
+
+Интеграция выполнена в `backend/src/llm.ts`:
+- Выбор провайдера по переменным окружения: при наличии `MISTRAL_API_KEY` используется Mistral, иначе — `OPENAI_API_KEY` (fallback).
+- Конечная точка: `POST https://api.mistral.ai/v1/chat/completions` с сообщениями `system` и `user`.
+- Формат ответа: ожидается JSON‑объект с массивом ранжирования `[{index, score}]`.
+
+Как запустить с Mistral:
+- Установите переменную окружения `MISTRAL_API_KEY`.
+- Необязательно: `MISTRAL_MODEL` (по умолчанию `mistral-small-latest`).
+- Запустите бэкенд: `npm run dev` в каталоге `backend`. Сервер будет использовать Mistral для переранжирования кандидатов в `/api/mapping/suggest` и `/api/mapping/elements/suggest`.
+
+Пример запроса (для справки):
+```
+POST https://api.mistral.ai/v1/chat/completions
+Authorization: Bearer $MISTRAL_API_KEY
+Content-Type: application/json
+
+{
+  "model": "mistral-small-latest",
+  "messages": [
+    { "role": "system", "content": "Ты помощник-сметчик..." },
+    { "role": "user", "content": "Дисциплина: АУПТ..." }
+  ],
+  "temperature": 0.2,
+  "response_format": { "type": "json_object" }
+}
+```
 
 ### Этап 2 — Конвертация матрицы в CMWC
 - [ ] Реализовать мэппинг ячеек с данными собранными из garantstroikompleks.
