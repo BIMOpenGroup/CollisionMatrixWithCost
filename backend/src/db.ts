@@ -4,11 +4,16 @@ import sqlite3 from 'sqlite3'
 
 sqlite3.verbose()
 
-const dbPath = path.resolve(__dirname, '../data/cmw.db')
-const dbDir = path.dirname(dbPath)
+const defaultDbPath = path.resolve(__dirname, '../data/cmw.db')
+const configuredPath = (process.env.SQLITE_DB_PATH || '').trim()
+const dbPath = configuredPath ? configuredPath : defaultDbPath
+const isMemory = dbPath === ':memory:'
+const dbDir = isMemory ? '' : path.dirname(dbPath)
 
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true })
+if (!isMemory) {
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true })
+  }
 }
 
 export const db = new sqlite3.Database(dbPath)
