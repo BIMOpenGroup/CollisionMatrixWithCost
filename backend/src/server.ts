@@ -1,3 +1,4 @@
+import './env'
 import { createApp } from './app'
 import { initDB } from './db'
 
@@ -14,4 +15,3 @@ initDB()
     console.error('[backend] DB init error:', err)
     process.exit(1)
   })
-

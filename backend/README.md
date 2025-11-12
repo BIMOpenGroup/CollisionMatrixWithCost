@@ -109,6 +109,31 @@ $ curl "http://localhost:3001/api/mapping/elements?grp=%D0%9E%D0%92%20(%D0%9E%D1
 {"ok":true,"suggestions":[{ "grp":"ОВ (Отоп.)", "element":"Радиаторы", "price_name":"...", "price":123.45 }],"total":1}
 ```
 
+## Полное заполнение таблиц
+- Подготовка:
+  - Запустите сервер: `npm run dev`
+  - Включите отладку LLM при необходимости: в текущем сеансе `PowerShell` выполните `setx LLM_DEBUG 1` или временно `\$env:LLM_DEBUG='1'`.
+- Заполнение цен:
+  - `Invoke-RestMethod -Uri "http://localhost:3001/api/prices/scrape" -Method POST | ConvertTo-Json -Depth 4`
+- Сохранение дисциплин:
+  - `Invoke-RestMethod -Uri "http://localhost:3001/api/disciplines/save" -Method POST | ConvertTo-Json -Depth 4`
+- Генерация сопоставления по дисциплинам:
+  - `Invoke-RestMethod -Uri "http://localhost:3001/api/mapping/suggest" -Method POST | ConvertTo-Json -Depth 4`
+- Генерация сопоставления по элементам матрицы:
+  - `Invoke-RestMethod -Uri "http://localhost:3001/api/mapping/elements/suggest" -Method POST | ConvertTo-Json -Depth 4`
+- Проверка результата:
+  - `Invoke-RestMethod -Uri "http://localhost:3001/api/debug/db/counts" -Method GET | ConvertTo-Json -Depth 3`
+  - Чтение записей: `Invoke-RestMethod -Uri "http://localhost:3001/api/mapping/elements?limit=20" -Method GET | ConvertTo-Json -Depth 6`
+
+### Избежание частых отказов LLM
+- Переменные окружения для контроля частоты:
+  - `LLM_REQUEST_DELAY_MS` — задержка перед каждым вызовом LLM в миллисекундах (например, `500`).
+  - `LLM_MAX_RETRIES` — число повторов при ответах `429/5xx`.
+- Пример установки на время текущей сессии:
+  - `\$env:LLM_REQUEST_DELAY_MS='500' ; \$env:LLM_MAX_RETRIES='2'`
+- Просмотр хвоста логов LLM:
+  - `Invoke-RestMethod -Uri "http://localhost:3001/api/debug/logs/llm?limit=200" -Method GET | ConvertTo-Json -Depth 3`
+
 ## Применение в MVP
 - Этап 1: наполнение БД базовыми стоимостями: `POST /api/prices/scrape` → `GET /api/prices`.
 - Этап 1.1: переранжирование (при наличии ключей LLM): `POST /api/debug/llm/rerank`.

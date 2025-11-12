@@ -21,6 +21,7 @@ export const db = new sqlite3.Database(dbPath)
 export function initDB(): Promise<void> {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
+      db.exec(`PRAGMA foreign_keys = ON`)
       db.run(
         `CREATE TABLE IF NOT EXISTS disciplines (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -130,8 +131,14 @@ export type StoredPriceRow = PriceRow & { id: number }
 export function insertPrice(row: PriceRow): Promise<void> {
   return new Promise((resolve, reject) => {
     db.run(
-      `INSERT OR REPLACE INTO prices (category, name, unit, price, currency, source, source_page, extra)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO prices (category, name, unit, price, currency, source, source_page, extra)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT(name, unit, source_page) DO UPDATE SET
+         category=excluded.category,
+         price=excluded.price,
+         currency=excluded.currency,
+         source=excluded.source,
+         extra=excluded.extra`,
       [
         row.category || null,
         row.name,
@@ -154,8 +161,14 @@ export function bulkInsertPrices(rows: PriceRow[]): Promise<number> {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
       const stmt = db.prepare(
-        `INSERT OR REPLACE INTO prices (category, name, unit, price, currency, source, source_page, extra)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+        `INSERT INTO prices (category, name, unit, price, currency, source, source_page, extra)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+         ON CONFLICT(name, unit, source_page) DO UPDATE SET
+           category=excluded.category,
+           price=excluded.price,
+           currency=excluded.currency,
+           source=excluded.source,
+           extra=excluded.extra`
       )
       let count = 0
       for (const r of rows) {
