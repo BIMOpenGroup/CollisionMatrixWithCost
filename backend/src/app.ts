@@ -2,7 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import path from 'path'
 import fs from 'fs'
-import { insertDiscipline, getDisciplines, bulkInsertPrices, getPrices, getMappingSuggestions, getElementSuggestions, db } from './db'
+import { insertDiscipline, getDisciplines, bulkInsertPrices, getPrices, getMappingSuggestions, getElementSuggestions, db, getMappingSuggestionById, updateMappingSuggestionStatus, getPriceById, insertSuggestionEvent, getElementSuggestionById, updateElementSuggestionStatus, getSuggestionEvents } from './db'
 import { scrapeGarantPrices } from './scrapeGarant'
 import { loadMatrixFromCsv, extractDisciplineGroups } from './matrix'
 import { buildSuggestions } from './mapping'
@@ -110,6 +110,23 @@ export function createApp() {
     }
   })
 
+  app.post('/api/mapping/suggestions/:id/status', async (req, res) => {
+    try {
+      const id = Number(req.params.id)
+      const body = typeof req.body === 'object' && req.body ? req.body : {}
+      const status = body.status === 'accepted' || body.status === 'rejected' || body.status === 'proposed' ? body.status : undefined
+      if (!Number.isFinite(id) || !status) return res.status(400).json({ ok: false, error: 'Required: numeric :id and body { status }' })
+      const sug = await getMappingSuggestionById(id)
+      if (!sug) return res.status(404).json({ ok: false, error: 'Suggestion not found' })
+      await updateMappingSuggestionStatus(id, status)
+      const price = await getPriceById(sug.price_id)
+      await insertSuggestionEvent({ type: 'discipline', suggestion_id: id, action: status === 'accepted' ? 'accepted' : 'rejected', price_id: sug.price_id, source: price?.source || null, source_page: price?.source_page || null, discipline: sug.discipline || null, grp: null, element: null, axis: null })
+      res.json({ ok: true, id, status })
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Failed to update suggestion status' })
+    }
+  })
+
   app.post('/api/mapping/elements/suggest', async (req, res) => {
     try {
       const matrix = loadMatrixFromCsv()
@@ -134,41 +151,40 @@ export function createApp() {
     }
   })
 
+  app.post('/api/mapping/elements/:id/status', async (req, res) => {
+    try {
+      const id = Number(req.params.id)
+      const body = typeof req.body === 'object' && req.body ? req.body : {}
+      const status = body.status === 'accepted' || body.status === 'rejected' || body.status === 'proposed' ? body.status : undefined
+      if (!Number.isFinite(id) || !status) return res.status(400).json({ ok: false, error: 'Required: numeric :id and body { status }' })
+      const sug = await getElementSuggestionById(id)
+      if (!sug) return res.status(404).json({ ok: false, error: 'Element suggestion not found' })
+      await updateElementSuggestionStatus(id, status)
+      const price = await getPriceById(sug.price_id)
+      await insertSuggestionEvent({ type: 'element', suggestion_id: id, action: status === 'accepted' ? 'accepted' : 'rejected', price_id: sug.price_id, source: price?.source || null, source_page: price?.source_page || null, discipline: null, grp: sug.grp || null, element: sug.element || null, axis: sug.axis || null })
+      res.json({ ok: true, id, status })
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Failed to update element suggestion status' })
+    }
+  })
+
+  app.get('/api/events/suggestions', async (req, res) => {
+    try {
+      const limit = req.query.limit ? Number(req.query.limit) : 200
+      const rows = await getSuggestionEvents(limit)
+      res.json({ ok: true, events: rows, total: rows.length })
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Failed to read suggestion events' })
+    }
+  })
+
   app.get('/api/debug/llm/providers', (req, res) => {
     try {
-      const mistralKey = process.env.MISTRAL_API_KEY
-      const openaiKey = process.env.OPENAI_API_KEY
       const providers: Array<{ name: string; baseUrl: string; model: string; apiKeyPresent: boolean }> = []
-      if (mistralKey) {
-        providers.push({
-          name: 'mistral',
-          baseUrl: process.env.MISTRAL_BASE_URL || 'https://api.mistral.ai/v1',
-          model: process.env.MISTRAL_MODEL || 'mistral-small-latest',
-          apiKeyPresent: true,
-        })
-      } else {
-        providers.push({
-          name: 'mistral',
-          baseUrl: process.env.MISTRAL_BASE_URL || 'https://api.mistral.ai/v1',
-          model: process.env.MISTRAL_MODEL || 'mistral-small-latest',
-          apiKeyPresent: false,
-        })
-      }
-      if (openaiKey) {
-        providers.push({
-          name: 'openai',
-          baseUrl: process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1',
-          model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
-          apiKeyPresent: true,
-        })
-      } else {
-        providers.push({
-          name: 'openai',
-          baseUrl: process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1',
-          model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
-          apiKeyPresent: false,
-        })
-      }
+      const baseUrl = process.env.LLM_BASE_URL || ''
+      const model = process.env.LLM_MODEL || ''
+      const apiKeyPresent = Boolean(process.env.LLM_API_KEY)
+      providers.push({ name: 'llm', baseUrl, model, apiKeyPresent })
       res.json({ ok: true, llmDebugEnabled: process.env.LLM_DEBUG === '1', providers })
     } catch (e: any) {
       res.status(500).json({ ok: false, error: e?.message || 'Failed to read LLM providers' })
@@ -178,27 +194,18 @@ export function createApp() {
   app.post('/api/debug/llm/ping', async (req, res) => {
     try {
       const body = typeof req.body === 'object' && req.body ? req.body : {}
-      const providerPref = typeof body.provider === 'string' ? body.provider : undefined
       const message = typeof body.message === 'string' ? body.message : 'test'
       const temperature = typeof body.temperature === 'number' ? body.temperature : 0.1
 
-      const mistralKey = process.env.MISTRAL_API_KEY
-      const openaiKey = process.env.OPENAI_API_KEY
-      const providers: Array<{ name: 'mistral' | 'openai'; baseUrl: string; apiKey: string; model: string }> = []
-      if (mistralKey) providers.push({ name: 'mistral', baseUrl: process.env.MISTRAL_BASE_URL || 'https://api.mistral.ai/v1', apiKey: mistralKey, model: process.env.MISTRAL_MODEL || 'mistral-small-latest' })
-      if (openaiKey) providers.push({ name: 'openai', baseUrl: process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1', apiKey: openaiKey, model: process.env.OPENAI_MODEL || 'gpt-4o-mini' })
-
-      let chosen = providers[0]
-      if (providerPref) {
-        const found = providers.find((p) => p.name === providerPref)
-        if (found) chosen = found
-      }
-      if (!chosen) return res.status(400).json({ ok: false, error: 'No LLM provider available (missing API keys)' })
+      const apiKey = process.env.LLM_API_KEY
+      const baseUrl = process.env.LLM_BASE_URL
+      const model = process.env.LLM_MODEL
+      if (!apiKey || !baseUrl || !model) return res.status(400).json({ ok: false, error: 'LLM_* env vars not set' })
 
       const content = await chatCompletionOpenAICompatible({
-        baseUrl: chosen.baseUrl,
-        apiKey: chosen.apiKey,
-        model: chosen.model,
+        baseUrl,
+        apiKey,
+        model,
         temperature,
         messages: [
           { role: 'system', content: 'Ответь строго JSON объектом вида {"pong":true,"echo":"..."}.' },
@@ -206,7 +213,7 @@ export function createApp() {
         ],
       })
 
-      res.json({ ok: true, provider: chosen.name, baseUrl: chosen.baseUrl, model: chosen.model, content })
+      res.json({ ok: true, provider: 'llm', baseUrl, model, content })
     } catch (e: any) {
       res.status(500).json({ ok: false, error: e?.message || 'LLM ping failed' })
     }
@@ -255,4 +262,3 @@ export function createApp() {
 
   return app
 }
-

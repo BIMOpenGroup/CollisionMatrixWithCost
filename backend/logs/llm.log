@@ -1268,3 +1268,491 @@
 [LLM][2025-11-12T19:27:22.899+03:00] response:content:received {"hasContent":true,"attempt":0}
 [LLM][2025-11-12T19:27:22.899+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 1.0},\n  {\"index\": 1, \"score\": 0.9},\n  {\"index\": 2, \"score\": 0.8},\n  {\"index\": 3, \"score\": 0.0},\n  {\"index\": 4, \"score\": 0.0},\n  {\"index\": 5, \"score\": 0.0},\n  {\"index\": 6, \"score\": 0.0},\n  {\"index\": 7, \"score\": 0.0}\n]"}
 [LLM][2025-11-12T19:27:22.900+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:08:37.265+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"АР / Стены","candidatesCount":8}
+[LLM][2025-11-13T15:08:38.267+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:08:38.516+03:00] response:status {"status":429,"statusText":"Too Many Requests","attempt":0}
+[LLM][2025-11-13T15:08:39.723+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":1}
+[LLM][2025-11-13T15:08:40.052+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"АР","candidatesCount":10}
+[LLM][2025-11-13T15:08:41.063+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:08:41.208+03:00] response:status {"status":200,"statusText":"OK","attempt":1}
+[LLM][2025-11-13T15:08:41.212+03:00] response:content:received {"hasContent":true,"attempt":1}
+[LLM][2025-11-13T15:08:41.213+03:00] response:content:text {"content":"[\n  {\"index\": 3, \"score\": 1.0},\n  {\"index\": 1, \"score\": 0.9},\n  {\"index\": 2, \"score\": 0.8},\n  {\"index\": 0, \"score\": 0.7},\n  {\"index\": 4, \"score\": 0.5},\n  {\"index\": 5, \"score\": 0.3},\n  {\"index\": 6, \"score\": 0.2}\n]"}
+[LLM][2025-11-13T15:08:41.214+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":7}
+[LLM][2025-11-13T15:08:41.218+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"АР / Витражи","candidatesCount":8}
+[LLM][2025-11-13T15:08:42.226+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:08:43.620+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:08:43.621+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:08:43.622+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 1.0},\n  {\"index\": 1, \"score\": 0.8},\n  {\"index\": 2, \"score\": 0.6},\n  {\"index\": 3, \"score\": 0.4},\n  {\"index\": 4, \"score\": 0.3},\n  {\"index\": 5, \"score\": 0.3},\n  {\"index\": 6, \"score\": 0.2},\n  {\"index\": 7, \"score\": 0.1},\n  {\"index\": 8, \"score\": 0.1},\n  {\"index\": 9, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:08:43.623+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":10}
+[LLM][2025-11-13T15:08:43.625+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"КР","candidatesCount":10}
+[LLM][2025-11-13T15:08:43.796+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:08:43.797+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:08:43.798+03:00] response:content:text {"content":"[\n  {\"index\": 3, \"score\": 1.0},\n  {\"index\": 0, \"score\": 0.5},\n  {\"index\": 1, \"score\": 0.5},\n  {\"index\": 2, \"score\": 0.3},\n  {\"index\": 4, \"score\": 0.2},\n  {\"index\": 5, \"score\": 0.2},\n  {\"index\": 6, \"score\": 0.2},\n  {\"index\": 7, \"score\": 0.2}\n]"}
+[LLM][2025-11-13T15:08:43.799+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:08:43.802+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"АР / Пол / Кровля","candidatesCount":8}
+[LLM][2025-11-13T15:08:44.630+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:08:44.817+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:08:46.157+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:08:46.159+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:08:46.160+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.9},\n  {\"index\": 3, \"score\": 0.8},\n  {\"index\": 6, \"score\": 0.7},\n  {\"index\": 1, \"score\": 0.6},\n  {\"index\": 4, \"score\": 0.2},\n  {\"index\": 5, \"score\": 0.2},\n  {\"index\": 2, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:08:46.160+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":7}
+[LLM][2025-11-13T15:08:46.162+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"АР / Потолок","candidatesCount":8}
+[LLM][2025-11-13T15:08:46.528+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:08:46.530+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:08:46.530+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 1.0},\n  {\"index\": 3, \"score\": 0.9},\n  {\"index\": 4, \"score\": 0.8},\n  {\"index\": 5, \"score\": 0.7},\n  {\"index\": 6, \"score\": 0.6},\n  {\"index\": 7, \"score\": 0.5},\n  {\"index\": 2, \"score\": 0.4},\n  {\"index\": 1, \"score\": 0.3},\n  {\"index\": 8, \"score\": 0.2},\n  {\"index\": 9, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:08:46.531+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":10}
+[LLM][2025-11-13T15:08:46.533+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ВК (К)","candidatesCount":10}
+[LLM][2025-11-13T15:08:47.167+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:08:47.535+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:08:47.685+03:00] response:status {"status":429,"statusText":"Too Many Requests","attempt":0}
+[LLM][2025-11-13T15:08:48.890+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":1}
+[LLM][2025-11-13T15:08:48.920+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:08:48.923+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:08:48.923+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.8},\n  {\"index\": 1, \"score\": 0.7},\n  {\"index\": 2, \"score\": 0.9},\n  {\"index\": 3, \"score\": 0.85},\n  {\"index\": 4, \"score\": 0.6},\n  {\"index\": 5, \"score\": 0.5},\n  {\"index\": 6, \"score\": 0.95},\n  {\"index\": 7, \"score\": 0.75}\n]"}
+[LLM][2025-11-13T15:08:48.924+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:08:48.927+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"АР / Двери / Окна","candidatesCount":8}
+[LLM][2025-11-13T15:08:49.928+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:08:50.710+03:00] response:status {"status":200,"statusText":"OK","attempt":1}
+[LLM][2025-11-13T15:08:50.711+03:00] response:content:received {"hasContent":true,"attempt":1}
+[LLM][2025-11-13T15:08:50.712+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 1},\n  {\"index\": 1, \"score\": 0.5},\n  {\"index\": 2, \"score\": 0.5},\n  {\"index\": 3, \"score\": 0.1},\n  {\"index\": 4, \"score\": 0},\n  {\"index\": 5, \"score\": 0},\n  {\"index\": 6, \"score\": 0},\n  {\"index\": 7, \"score\": 0},\n  {\"index\": 8, \"score\": 0},\n  {\"index\": 9, \"score\": 0}\n]"}
+[LLM][2025-11-13T15:08:50.713+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":10}
+[LLM][2025-11-13T15:08:50.714+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ОВ (Вент.)","candidatesCount":10}
+[LLM][2025-11-13T15:08:51.425+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:08:51.427+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:08:51.428+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.1},\n  {\"index\": 1, \"score\": 0.1},\n  {\"index\": 2, \"score\": 0.0},\n  {\"index\": 3, \"score\": 0.0},\n  {\"index\": 4, \"score\": 0.0},\n  {\"index\": 5, \"score\": 0.0},\n  {\"index\": 6, \"score\": 0.0},\n  {\"index\": 7, \"score\": 0.0}\n]"}
+[LLM][2025-11-13T15:08:51.428+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:08:51.430+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"АР / Ограждения","candidatesCount":8}
+[LLM][2025-11-13T15:08:51.716+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:08:52.444+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:08:53.676+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:08:53.677+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:08:53.678+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.1},\n  {\"index\": 1, \"score\": 0.1},\n  {\"index\": 2, \"score\": 0.1},\n  {\"index\": 3, \"score\": 0.0},\n  {\"index\": 4, \"score\": 0.0},\n  {\"index\": 5, \"score\": 0.0},\n  {\"index\": 6, \"score\": 0.0},\n  {\"index\": 7, \"score\": 0.0},\n  {\"index\": 8, \"score\": 0.0},\n  {\"index\": 9, \"score\": 0.0}\n]"}
+[LLM][2025-11-13T15:08:53.679+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":10}
+[LLM][2025-11-13T15:08:53.680+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ОВ (Отоп.)","candidatesCount":10}
+[LLM][2025-11-13T15:08:53.849+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:08:53.850+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:08:53.851+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.8},\n  {\"index\": 1, \"score\": 0.6},\n  {\"index\": 2, \"score\": 0.4},\n  {\"index\": 3, \"score\": 0.3},\n  {\"index\": 4, \"score\": 0.3},\n  {\"index\": 5, \"score\": 0.2},\n  {\"index\": 6, \"score\": 0.2},\n  {\"index\": 7, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:08:53.852+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:08:53.855+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"КР / Стены","candidatesCount":8}
+[LLM][2025-11-13T15:08:54.694+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:08:54.831+03:00] response:status {"status":429,"statusText":"Too Many Requests","attempt":0}
+[LLM][2025-11-13T15:08:54.866+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:08:56.046+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":1}
+[LLM][2025-11-13T15:08:56.236+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:08:56.338+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:08:56.338+03:00] response:content:text {"content":"[\n  {\"index\": 3, \"score\": 1.0},\n  {\"index\": 0, \"score\": 0.9},\n  {\"index\": 1, \"score\": 0.8},\n  {\"index\": 2, \"score\": 0.8},\n  {\"index\": 4, \"score\": 0.7},\n  {\"index\": 6, \"score\": 0.6},\n  {\"index\": 7, \"score\": 0.6},\n  {\"index\": 5, \"score\": 0.5}\n]"}
+[LLM][2025-11-13T15:08:56.339+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:08:56.342+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"КР / Коллоны / Пилоны","candidatesCount":8}
+[LLM][2025-11-13T15:08:57.352+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:08:57.912+03:00] response:status {"status":200,"statusText":"OK","attempt":1}
+[LLM][2025-11-13T15:08:57.914+03:00] response:content:received {"hasContent":true,"attempt":1}
+[LLM][2025-11-13T15:08:57.915+03:00] response:content:text {"content":"[\n  {\"index\": 4, \"score\": 0.8},\n  {\"index\": 5, \"score\": 0.7},\n  {\"index\": 6, \"score\": 0.7},\n  {\"index\": 3, \"score\": 0.5},\n  {\"index\": 0, \"score\": 0.2},\n  {\"index\": 1, \"score\": 0.2},\n  {\"index\": 2, \"score\": 0.2},\n  {\"index\": 7, \"score\": 0.1},\n  {\"index\": 8, \"score\": 0.1},\n  {\"index\": 9, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:08:57.915+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":10}
+[LLM][2025-11-13T15:08:57.917+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ВК (В)","candidatesCount":10}
+[LLM][2025-11-13T15:08:58.930+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:08:59.159+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:08:59.160+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:08:59.161+03:00] response:content:text {"content":"[\n  {\"index\": 4, \"score\": 1.0},\n  {\"index\": 5, \"score\": 0.9},\n  {\"index\": 0, \"score\": 0.7},\n  {\"index\": 2, \"score\": 0.7},\n  {\"index\": 1, \"score\": 0.5},\n  {\"index\": 3, \"score\": 0.3},\n  {\"index\": 6, \"score\": 0.2},\n  {\"index\": 7, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:08:59.162+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:08:59.164+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"КР / Плиты фундамента","candidatesCount":8}
+[LLM][2025-11-13T15:09:00.178+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:09:00.362+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:09:00.364+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:09:00.364+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 1},\n  {\"index\": 1, \"score\": 0.5},\n  {\"index\": 2, \"score\": 0.5},\n  {\"index\": 3, \"score\": 0},\n  {\"index\": 4, \"score\": 0},\n  {\"index\": 5, \"score\": 0},\n  {\"index\": 6, \"score\": 0},\n  {\"index\": 7, \"score\": 0},\n  {\"index\": 8, \"score\": 0},\n  {\"index\": 9, \"score\": 0}\n]"}
+[LLM][2025-11-13T15:09:00.365+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":10}
+[LLM][2025-11-13T15:09:00.367+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"АУПТ","candidatesCount":10}
+[LLM][2025-11-13T15:09:01.377+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:09:01.447+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:09:01.449+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:09:01.449+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.8},\n  {\"index\": 1, \"score\": 0.2},\n  {\"index\": 2, \"score\": 0.2},\n  {\"index\": 3, \"score\": 0.2},\n  {\"index\": 4, \"score\": 0.2},\n  {\"index\": 5, \"score\": 0.1},\n  {\"index\": 6, \"score\": 0.1},\n  {\"index\": 7, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:09:01.450+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:09:01.453+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"КР / Перекрытия / Покрытия / Рампы","candidatesCount":8}
+[LLM][2025-11-13T15:09:02.458+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:09:02.602+03:00] response:status {"status":429,"statusText":"Too Many Requests","attempt":0}
+[LLM][2025-11-13T15:09:03.131+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:09:03.133+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:09:03.134+03:00] response:content:text {"content":"[\n  {\"index\": 2, \"score\": 1.0},\n  {\"index\": 3, \"score\": 1.0},\n  {\"index\": 4, \"score\": 1.0},\n  {\"index\": 5, \"score\": 1.0},\n  {\"index\": 6, \"score\": 1.0},\n  {\"index\": 7, \"score\": 1.0},\n  {\"index\": 0, \"score\": 0.5},\n  {\"index\": 1, \"score\": 0.5},\n  {\"index\": 8, \"score\": 0.0},\n  {\"index\": 9, \"score\": 0.0}\n]"}
+[LLM][2025-11-13T15:09:03.134+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":10}
+[LLM][2025-11-13T15:09:03.136+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ЭО, ЭС, ЭМ, СС","candidatesCount":10}
+[LLM][2025-11-13T15:09:03.818+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":1}
+[LLM][2025-11-13T15:09:03.967+03:00] response:status {"status":429,"statusText":"Too Many Requests","attempt":1}
+[LLM][2025-11-13T15:09:04.140+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:09:05.373+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":2}
+[LLM][2025-11-13T15:09:06.904+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:09:07.099+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:09:07.099+03:00] response:content:text {"content":"[\n  {\"index\": 3, \"score\": 0.8},\n  {\"index\": 4, \"score\": 0.6},\n  {\"index\": 5, \"score\": 0.6},\n  {\"index\": 6, \"score\": 0.6},\n  {\"index\": 0, \"score\": 0.4},\n  {\"index\": 1, \"score\": 0.4},\n  {\"index\": 2, \"score\": 0.4},\n  {\"index\": 7, \"score\": 0.2},\n  {\"index\": 8, \"score\": 0.2},\n  {\"index\": 9, \"score\": 0.2}\n]"}
+[LLM][2025-11-13T15:09:07.100+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":10}
+[LLM][2025-11-13T15:09:08.202+03:00] response:status {"status":200,"statusText":"OK","attempt":2}
+[LLM][2025-11-13T15:09:08.203+03:00] response:content:received {"hasContent":true,"attempt":2}
+[LLM][2025-11-13T15:09:08.204+03:00] response:content:text {"content":"[\n  {\"index\": 1, \"score\": 1.0},\n  {\"index\": 5, \"score\": 0.8},\n  {\"index\": 7, \"score\": 0.6},\n  {\"index\": 0, \"score\": 0.5},\n  {\"index\": 6, \"score\": 0.3},\n  {\"index\": 2, \"score\": 0.2},\n  {\"index\": 4, \"score\": 0.2},\n  {\"index\": 3, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:09:08.204+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:09:08.206+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"КР / Балки","candidatesCount":8}
+[LLM][2025-11-13T15:09:09.219+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:09:10.559+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:09:10.561+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:09:10.562+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.8},\n  {\"index\": 2, \"score\": 0.7},\n  {\"index\": 1, \"score\": 0.5},\n  {\"index\": 5, \"score\": 0.3},\n  {\"index\": 6, \"score\": 0.2},\n  {\"index\": 7, \"score\": 0.2},\n  {\"index\": 4, \"score\": 0.1},\n  {\"index\": 3, \"score\": 0.0}\n]"}
+[LLM][2025-11-13T15:09:10.562+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:09:10.564+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"КР / КМ","candidatesCount":8}
+[LLM][2025-11-13T15:09:11.579+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:09:12.936+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:09:12.937+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:09:12.938+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.8},\n  {\"index\": 1, \"score\": 0.9},\n  {\"index\": 2, \"score\": 0.7},\n  {\"index\": 5, \"score\": 0.6},\n  {\"index\": 6, \"score\": 0.5},\n  {\"index\": 7, \"score\": 0.4},\n  {\"index\": 3, \"score\": 0.2},\n  {\"index\": 4, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:09:12.939+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:09:12.941+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"КР / Лестницы","candidatesCount":8}
+[LLM][2025-11-13T15:09:13.951+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:17:49.502+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"АР / Стены","candidatesCount":8}
+[LLM][2025-11-13T15:17:50.504+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:17:52.184+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:17:52.188+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:17:52.189+03:00] response:content:text {"content":"[\n  {\"index\": 3, \"score\": 1.0},\n  {\"index\": 0, \"score\": 0.9},\n  {\"index\": 1, \"score\": 0.8},\n  {\"index\": 2, \"score\": 0.8},\n  {\"index\": 4, \"score\": 0.2},\n  {\"index\": 5, \"score\": 0.2},\n  {\"index\": 6, \"score\": 0.1},\n  {\"index\": 7, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:17:52.190+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:17:52.193+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"АР / Витражи","candidatesCount":8}
+[LLM][2025-11-13T15:17:53.205+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:17:54.465+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:17:54.466+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:17:54.467+03:00] response:content:text {"content":"[\n  {\"index\": 3, \"score\": 1.0},\n  {\"index\": 0, \"score\": 0.5},\n  {\"index\": 1, \"score\": 0.5},\n  {\"index\": 2, \"score\": 0.3},\n  {\"index\": 4, \"score\": 0.2},\n  {\"index\": 5, \"score\": 0.2},\n  {\"index\": 6, \"score\": 0.2},\n  {\"index\": 7, \"score\": 0.2}\n]"}
+[LLM][2025-11-13T15:17:54.468+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:17:54.471+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"АР / Пол / Кровля","candidatesCount":8}
+[LLM][2025-11-13T15:17:55.478+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:17:56.991+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:17:56.993+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:17:56.994+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.9},\n  {\"index\": 3, \"score\": 0.8},\n  {\"index\": 6, \"score\": 0.7},\n  {\"index\": 1, \"score\": 0.6},\n  {\"index\": 4, \"score\": 0.2},\n  {\"index\": 5, \"score\": 0.2},\n  {\"index\": 2, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:17:56.995+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":7}
+[LLM][2025-11-13T15:17:56.996+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"АР / Потолок","candidatesCount":8}
+[LLM][2025-11-13T15:17:58.004+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:17:58.135+03:00] response:status {"status":429,"statusText":"Too Many Requests","attempt":0}
+[LLM][2025-11-13T15:17:59.352+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":1}
+[LLM][2025-11-13T15:18:00.979+03:00] response:status {"status":200,"statusText":"OK","attempt":1}
+[LLM][2025-11-13T15:18:00.980+03:00] response:content:received {"hasContent":true,"attempt":1}
+[LLM][2025-11-13T15:18:00.981+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.8},\n  {\"index\": 1, \"score\": 0.9},\n  {\"index\": 2, \"score\": 0.95},\n  {\"index\": 3, \"score\": 0.9},\n  {\"index\": 4, \"score\": 0.85},\n  {\"index\": 5, \"score\": 0.8},\n  {\"index\": 6, \"score\": 0.9},\n  {\"index\": 7, \"score\": 0.7}\n]"}
+[LLM][2025-11-13T15:18:00.982+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:18:00.984+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"АР / Двери / Окна","candidatesCount":8}
+[LLM][2025-11-13T15:18:01.992+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:18:03.642+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:18:03.644+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:18:03.645+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.1},\n  {\"index\": 1, \"score\": 0.1},\n  {\"index\": 2, \"score\": 0.0},\n  {\"index\": 3, \"score\": 0.0},\n  {\"index\": 4, \"score\": 0.0},\n  {\"index\": 5, \"score\": 0.0},\n  {\"index\": 6, \"score\": 0.0},\n  {\"index\": 7, \"score\": 0.0}\n]"}
+[LLM][2025-11-13T15:18:03.646+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:18:03.648+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"АР / Ограждения","candidatesCount":8}
+[LLM][2025-11-13T15:18:04.649+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:18:05.772+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:18:05.773+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:18:05.774+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.8},\n  {\"index\": 1, \"score\": 0.6},\n  {\"index\": 2, \"score\": 0.4},\n  {\"index\": 3, \"score\": 0.3},\n  {\"index\": 4, \"score\": 0.3},\n  {\"index\": 5, \"score\": 0.5},\n  {\"index\": 6, \"score\": 0.7},\n  {\"index\": 7, \"score\": 0.5}\n]"}
+[LLM][2025-11-13T15:18:05.775+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:18:05.778+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"КР / Стены","candidatesCount":8}
+[LLM][2025-11-13T15:18:06.784+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:18:06.909+03:00] response:status {"status":429,"statusText":"Too Many Requests","attempt":0}
+[LLM][2025-11-13T15:18:08.126+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":1}
+[LLM][2025-11-13T15:18:09.683+03:00] response:status {"status":200,"statusText":"OK","attempt":1}
+[LLM][2025-11-13T15:18:09.685+03:00] response:content:received {"hasContent":true,"attempt":1}
+[LLM][2025-11-13T15:18:09.686+03:00] response:content:text {"content":"[\n  {\"index\": 3, \"score\": 1.0},\n  {\"index\": 0, \"score\": 0.9},\n  {\"index\": 1, \"score\": 0.8},\n  {\"index\": 2, \"score\": 0.8},\n  {\"index\": 4, \"score\": 0.7},\n  {\"index\": 6, \"score\": 0.6},\n  {\"index\": 7, \"score\": 0.6},\n  {\"index\": 5, \"score\": 0.5}\n]"}
+[LLM][2025-11-13T15:18:09.687+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:18:09.689+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"КР / Коллоны / Пилоны","candidatesCount":8}
+[LLM][2025-11-13T15:18:10.705+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:18:11.802+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:18:11.804+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:18:11.805+03:00] response:content:text {"content":"[\n  {\"index\": 4, \"score\": 1.0},\n  {\"index\": 5, \"score\": 0.8},\n  {\"index\": 0, \"score\": 0.6},\n  {\"index\": 2, \"score\": 0.6},\n  {\"index\": 1, \"score\": 0.4},\n  {\"index\": 3, \"score\": 0.2},\n  {\"index\": 6, \"score\": 0.1},\n  {\"index\": 7, \"score\": 0.0}\n]"}
+[LLM][2025-11-13T15:18:11.806+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:18:11.807+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"КР / Плиты фундамента","candidatesCount":8}
+[LLM][2025-11-13T15:18:12.809+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:18:13.918+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:18:13.920+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:18:13.920+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.8},\n  {\"index\": 1, \"score\": 0.3},\n  {\"index\": 2, \"score\": 0.4},\n  {\"index\": 3, \"score\": 0.3},\n  {\"index\": 4, \"score\": 0.3},\n  {\"index\": 5, \"score\": 0.2},\n  {\"index\": 6, \"score\": 0.2},\n  {\"index\": 7, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:18:13.921+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:18:13.923+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"КР / Перекрытия / Покрытия / Рампы","candidatesCount":8}
+[LLM][2025-11-13T15:18:14.939+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:18:15.089+03:00] response:status {"status":429,"statusText":"Too Many Requests","attempt":0}
+[LLM][2025-11-13T15:18:16.293+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":1}
+[LLM][2025-11-13T15:18:18.005+03:00] response:status {"status":200,"statusText":"OK","attempt":1}
+[LLM][2025-11-13T15:18:18.007+03:00] response:content:received {"hasContent":true,"attempt":1}
+[LLM][2025-11-13T15:18:18.008+03:00] response:content:text {"content":"[\n  {\"index\": 1, \"score\": 0.9},\n  {\"index\": 5, \"score\": 0.7},\n  {\"index\": 7, \"score\": 0.6},\n  {\"index\": 0, \"score\": 0.5},\n  {\"index\": 6, \"score\": 0.3},\n  {\"index\": 2, \"score\": 0.2},\n  {\"index\": 4, \"score\": 0.2},\n  {\"index\": 3, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:18:18.009+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:18:18.010+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"КР / Балки","candidatesCount":8}
+[LLM][2025-11-13T15:18:19.018+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:18:20.254+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:18:20.256+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:18:20.256+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.8},\n  {\"index\": 2, \"score\": 0.7},\n  {\"index\": 1, \"score\": 0.6},\n  {\"index\": 3, \"score\": 0.2},\n  {\"index\": 4, \"score\": 0.1},\n  {\"index\": 5, \"score\": 0.1},\n  {\"index\": 6, \"score\": 0.1},\n  {\"index\": 7, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:18:20.257+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:18:20.258+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"КР / КМ","candidatesCount":8}
+[LLM][2025-11-13T15:18:21.262+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:18:22.972+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:18:22.974+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:18:22.975+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.8},\n  {\"index\": 1, \"score\": 0.9},\n  {\"index\": 2, \"score\": 0.7},\n  {\"index\": 5, \"score\": 0.6},\n  {\"index\": 6, \"score\": 0.5},\n  {\"index\": 7, \"score\": 0.4},\n  {\"index\": 3, \"score\": 0.2},\n  {\"index\": 4, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:18:22.976+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:18:22.978+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"КР / Лестницы","candidatesCount":8}
+[LLM][2025-11-13T15:18:23.992+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:18:25.681+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:18:25.683+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:18:25.683+03:00] response:content:text {"content":"[\n  {\"index\": 2, \"score\": 1.0},\n  {\"index\": 1, \"score\": 0.5},\n  {\"index\": 0, \"score\": 0.3},\n  {\"index\": 3, \"score\": 0.3},\n  {\"index\": 4, \"score\": 0.1},\n  {\"index\": 5, \"score\": 0.1},\n  {\"index\": 6, \"score\": 0.0},\n  {\"index\": 7, \"score\": 0.0}\n]"}
+[LLM][2025-11-13T15:18:25.684+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:18:25.686+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ВК (К) / Трубы / Дренаж","candidatesCount":8}
+[LLM][2025-11-13T15:18:26.702+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:18:28.351+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:18:28.353+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:18:28.353+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.8},\n  {\"index\": 1, \"score\": 0.9},\n  {\"index\": 2, \"score\": 0.7},\n  {\"index\": 3, \"score\": 0.7},\n  {\"index\": 4, \"score\": 0.8},\n  {\"index\": 5, \"score\": 0.2},\n  {\"index\": 6, \"score\": 0.6},\n  {\"index\": 7, \"score\": 0.7}\n]"}
+[LLM][2025-11-13T15:18:28.354+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:18:28.356+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ВК (К) / Оборудование","candidatesCount":8}
+[LLM][2025-11-13T15:18:29.363+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:18:30.936+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:18:30.938+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:18:30.939+03:00] response:content:text {"content":"[\n  {\"index\": 4, \"score\": 0.8},\n  {\"index\": 5, \"score\": 0.7},\n  {\"index\": 6, \"score\": 0.6},\n  {\"index\": 7, \"score\": 0.6},\n  {\"index\": 1, \"score\": 0.5},\n  {\"index\": 2, \"score\": 0.5},\n  {\"index\": 3, \"score\": 0.4},\n  {\"index\": 0, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:18:30.939+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:18:30.942+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ОВ (Вент.) / Воздухораспредел.","candidatesCount":8}
+[LLM][2025-11-13T15:18:31.957+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:18:33.290+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:18:33.291+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:18:33.292+03:00] response:content:text {"content":"[\n  {\"index\": 1, \"score\": 1.0},\n  {\"index\": 0, \"score\": 0.9},\n  {\"index\": 5, \"score\": 0.7},\n  {\"index\": 6, \"score\": 0.7},\n  {\"index\": 3, \"score\": 0.6},\n  {\"index\": 4, \"score\": 0.6},\n  {\"index\": 2, \"score\": 0.2}\n]"}
+[LLM][2025-11-13T15:18:33.293+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":7}
+[LLM][2025-11-13T15:18:33.294+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ОВ (Вент.) / Воздуховод","candidatesCount":8}
+[LLM][2025-11-13T15:18:34.299+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:18:36.023+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:18:36.025+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:18:36.026+03:00] response:content:text {"content":"[\n  {\"index\": 2, \"score\": 0.9},\n  {\"index\": 4, \"score\": 0.8},\n  {\"index\": 7, \"score\": 0.7},\n  {\"index\": 0, \"score\": 0.6},\n  {\"index\": 1, \"score\": 0.6},\n  {\"index\": 3, \"score\": 0.5},\n  {\"index\": 5, \"score\": 0.4},\n  {\"index\": 6, \"score\": 0.4}\n]"}
+[LLM][2025-11-13T15:18:36.027+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:18:36.029+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ОВ (Вент.) / Оборудование","candidatesCount":8}
+[LLM][2025-11-13T15:18:37.030+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:18:38.511+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:18:38.513+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:18:38.513+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.1},\n  {\"index\": 1, \"score\": 0.3},\n  {\"index\": 2, \"score\": 0.3},\n  {\"index\": 3, \"score\": 0.3},\n  {\"index\": 4, \"score\": 0.3},\n  {\"index\": 5, \"score\": 0.3},\n  {\"index\": 6, \"score\": 0.3},\n  {\"index\": 7, \"score\": 0.3}\n]"}
+[LLM][2025-11-13T15:18:38.514+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:18:38.516+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ОВ (Отоп.) / Трубы","candidatesCount":8}
+[LLM][2025-11-13T15:18:39.519+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:18:40.554+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:18:40.555+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:18:40.556+03:00] response:content:text {"content":"[\n  {\"index\": 1, \"score\": 1.0},\n  {\"index\": 0, \"score\": 0.9},\n  {\"index\": 5, \"score\": 0.8},\n  {\"index\": 4, \"score\": 0.7},\n  {\"index\": 7, \"score\": 0.6},\n  {\"index\": 3, \"score\": 0.5},\n  {\"index\": 2, \"score\": 0.4},\n  {\"index\": 6, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:18:40.556+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:18:40.559+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ОВ (Отоп.) / Оборудование","candidatesCount":8}
+[LLM][2025-11-13T15:18:41.573+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:18:43.252+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:18:43.253+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:18:43.254+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.8},\n  {\"index\": 1, \"score\": 0.6},\n  {\"index\": 2, \"score\": 0.7},\n  {\"index\": 3, \"score\": 0.6},\n  {\"index\": 4, \"score\": 0.9},\n  {\"index\": 5, \"score\": 0.9},\n  {\"index\": 6, \"score\": 0.6},\n  {\"index\": 7, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:18:43.254+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:18:43.256+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ВК (В) / Трубы","candidatesCount":8}
+[LLM][2025-11-13T15:18:44.263+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:18:45.658+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:18:45.659+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:18:45.660+03:00] response:content:text {"content":"[\n  {\"index\": 1, \"score\": 1.0},\n  {\"index\": 6, \"score\": 0.9},\n  {\"index\": 5, \"score\": 0.8},\n  {\"index\": 3, \"score\": 0.7},\n  {\"index\": 0, \"score\": 0.6},\n  {\"index\": 4, \"score\": 0.5},\n  {\"index\": 2, \"score\": 0.4},\n  {\"index\": 7, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:18:45.661+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:18:45.662+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ВК (В) / Оборудование","candidatesCount":8}
+[LLM][2025-11-13T15:18:46.678+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:18:48.421+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:18:48.423+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:18:48.424+03:00] response:content:text {"content":"[\n  {\"index\": 4, \"score\": 0.9},\n  {\"index\": 5, \"score\": 0.8},\n  {\"index\": 6, \"score\": 0.7},\n  {\"index\": 7, \"score\": 0.7},\n  {\"index\": 1, \"score\": 0.6},\n  {\"index\": 2, \"score\": 0.6},\n  {\"index\": 3, \"score\": 0.5},\n  {\"index\": 0, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:18:48.424+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:18:48.426+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"АУПТ / Оборудование","candidatesCount":8}
+[LLM][2025-11-13T15:18:49.438+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:18:50.871+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:18:50.873+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:18:50.873+03:00] response:content:text {"content":"[\n  {\"index\": 1, \"score\": 0.8},\n  {\"index\": 2, \"score\": 0.7},\n  {\"index\": 3, \"score\": 0.6},\n  {\"index\": 4, \"score\": 0.9},\n  {\"index\": 5, \"score\": 0.9},\n  {\"index\": 6, \"score\": 0.8},\n  {\"index\": 7, \"score\": 0.8},\n  {\"index\": 0, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:18:50.874+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:18:50.876+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"АУПТ / Трубы","candidatesCount":8}
+[LLM][2025-11-13T15:18:51.889+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:18:53.734+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:18:53.735+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:18:53.736+03:00] response:content:text {"content":"[\n  {\"index\": 1, \"score\": 1.0},\n  {\"index\": 0, \"score\": 0.9},\n  {\"index\": 6, \"score\": 0.8},\n  {\"index\": 7, \"score\": 0.7},\n  {\"index\": 3, \"score\": 0.6},\n  {\"index\": 4, \"score\": 0.5},\n  {\"index\": 2, \"score\": 0.3},\n  {\"index\": 5, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:18:53.737+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:18:53.739+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"АУПТ / Спринклеры","candidatesCount":8}
+[LLM][2025-11-13T15:18:54.746+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:18:55.590+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:18:55.593+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:18:55.593+03:00] response:content:text {"content":"[\n  {\"index\": 4, \"score\": 0.8},\n  {\"index\": 5, \"score\": 0.7},\n  {\"index\": 6, \"score\": 0.7},\n  {\"index\": 7, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:18:55.594+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":4}
+[LLM][2025-11-13T15:18:55.596+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ЭО, ЭС, ЭМ, СС / Кабельканалы / Лотки","candidatesCount":8}
+[LLM][2025-11-13T15:18:56.602+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:18:56.848+03:00] response:status {"status":429,"statusText":"Too Many Requests","attempt":0}
+[LLM][2025-11-13T15:18:58.056+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":1}
+[LLM][2025-11-13T15:18:59.843+03:00] response:status {"status":200,"statusText":"OK","attempt":1}
+[LLM][2025-11-13T15:18:59.845+03:00] response:content:received {"hasContent":true,"attempt":1}
+[LLM][2025-11-13T15:18:59.846+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 1.0},\n  {\"index\": 1, \"score\": 1.0},\n  {\"index\": 2, \"score\": 0.0},\n  {\"index\": 3, \"score\": 0.0},\n  {\"index\": 4, \"score\": 0.0},\n  {\"index\": 5, \"score\": 0.0},\n  {\"index\": 6, \"score\": 0.0},\n  {\"index\": 7, \"score\": 0.0}\n]"}
+[LLM][2025-11-13T15:18:59.847+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:18:59.848+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ЭО, ЭС, ЭМ, СС / Светильники","candidatesCount":8}
+[LLM][2025-11-13T15:19:00.858+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:19:02.021+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:19:02.023+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:19:02.024+03:00] response:content:text {"content":"[\n  {\"index\": 3, \"score\": 1.0},\n  {\"index\": 4, \"score\": 1.0},\n  {\"index\": 5, \"score\": 1.0},\n  {\"index\": 6, \"score\": 1.0},\n  {\"index\": 0, \"score\": 0.5},\n  {\"index\": 1, \"score\": 0.5},\n  {\"index\": 2, \"score\": 0.5},\n  {\"index\": 7, \"score\": 0.0}\n]"}
+[LLM][2025-11-13T15:19:02.024+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:19:02.026+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ЭО, ЭС, ЭМ, СС / Оборудование","candidatesCount":8}
+[LLM][2025-11-13T15:19:03.039+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:19:05.694+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:19:05.696+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:19:05.697+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.1},\n  {\"index\": 1, \"score\": 0.8},\n  {\"index\": 2, \"score\": 0.8},\n  {\"index\": 3, \"score\": 0.8},\n  {\"index\": 4, \"score\": 0.8},\n  {\"index\": 5, \"score\": 0.8},\n  {\"index\": 6, \"score\": 0.8},\n  {\"index\": 7, \"score\": 0.8}\n]"}
+[LLM][2025-11-13T15:19:05.697+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:19:05.699+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ЭО, ЭС, ЭМ, СС / Щиты / Шкафы","candidatesCount":8}
+[LLM][2025-11-13T15:19:06.703+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:19:08.968+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:19:08.970+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:19:08.971+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.9},\n  {\"index\": 1, \"score\": 0.8},\n  {\"index\": 2, \"score\": 0.7},\n  {\"index\": 6, \"score\": 0.6},\n  {\"index\": 5, \"score\": 0.5},\n  {\"index\": 7, \"score\": 0.4},\n  {\"index\": 3, \"score\": 0.2},\n  {\"index\": 4, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:19:08.972+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:19:08.974+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"АР / Стены","candidatesCount":8}
+[LLM][2025-11-13T15:19:09.978+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:19:11.148+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:19:11.149+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:19:11.150+03:00] response:content:text {"content":"[\n  {\"index\": 3, \"score\": 1.0},\n  {\"index\": 0, \"score\": 0.9},\n  {\"index\": 1, \"score\": 0.8},\n  {\"index\": 2, \"score\": 0.8},\n  {\"index\": 4, \"score\": 0.7},\n  {\"index\": 5, \"score\": 0.7},\n  {\"index\": 6, \"score\": 0.6}\n]"}
+[LLM][2025-11-13T15:19:11.151+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":7}
+[LLM][2025-11-13T15:19:11.153+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"АР / Витражи","candidatesCount":8}
+[LLM][2025-11-13T15:19:12.160+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:19:13.444+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:19:13.445+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:19:13.446+03:00] response:content:text {"content":"[\n  {\"index\": 3, \"score\": 1.0},\n  {\"index\": 0, \"score\": 0.5},\n  {\"index\": 1, \"score\": 0.5},\n  {\"index\": 2, \"score\": 0.3},\n  {\"index\": 4, \"score\": 0.2},\n  {\"index\": 5, \"score\": 0.2},\n  {\"index\": 6, \"score\": 0.2},\n  {\"index\": 7, \"score\": 0.2}\n]"}
+[LLM][2025-11-13T15:19:13.446+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:19:13.448+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"АР / Пол / Кровля","candidatesCount":8}
+[LLM][2025-11-13T15:19:14.461+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:19:16.320+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:19:16.322+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:19:16.322+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.9},\n  {\"index\": 3, \"score\": 0.8},\n  {\"index\": 6, \"score\": 0.7},\n  {\"index\": 1, \"score\": 0.6},\n  {\"index\": 4, \"score\": 0.2},\n  {\"index\": 5, \"score\": 0.2},\n  {\"index\": 2, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:19:16.323+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":7}
+[LLM][2025-11-13T15:19:16.325+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"АР / Потолок","candidatesCount":8}
+[LLM][2025-11-13T15:19:17.329+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:19:18.729+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:19:18.731+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:19:18.732+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.8},\n  {\"index\": 1, \"score\": 0.9},\n  {\"index\": 2, \"score\": 0.9},\n  {\"index\": 3, \"score\": 0.8},\n  {\"index\": 4, \"score\": 0.7},\n  {\"index\": 5, \"score\": 0.6},\n  {\"index\": 6, \"score\": 0.7},\n  {\"index\": 7, \"score\": 0.5}\n]"}
+[LLM][2025-11-13T15:19:18.733+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:19:18.734+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"АР / Двери / Окна","candidatesCount":8}
+[LLM][2025-11-13T15:19:19.736+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:19:21.359+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:19:21.360+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:19:21.361+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.1},\n  {\"index\": 1, \"score\": 0.1},\n  {\"index\": 2, \"score\": 0.0},\n  {\"index\": 3, \"score\": 0.0},\n  {\"index\": 4, \"score\": 0.0},\n  {\"index\": 5, \"score\": 0.0},\n  {\"index\": 6, \"score\": 0.0},\n  {\"index\": 7, \"score\": 0.0}\n]"}
+[LLM][2025-11-13T15:19:21.362+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:19:21.364+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"АР / Ограждения","candidatesCount":8}
+[LLM][2025-11-13T15:19:22.367+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:19:23.612+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:19:23.614+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:19:23.614+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.9},\n  {\"index\": 5, \"score\": 0.7},\n  {\"index\": 7, \"score\": 0.6},\n  {\"index\": 1, \"score\": 0.5},\n  {\"index\": 2, \"score\": 0.4},\n  {\"index\": 3, \"score\": 0.3},\n  {\"index\": 4, \"score\": 0.3},\n  {\"index\": 6, \"score\": 0.2}\n]"}
+[LLM][2025-11-13T15:19:23.615+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:19:23.617+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"КР / Стены","candidatesCount":8}
+[LLM][2025-11-13T15:19:24.633+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:19:26.001+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:19:26.003+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:19:26.004+03:00] response:content:text {"content":"[\n  {\"index\": 3, \"score\": 1.0},\n  {\"index\": 0, \"score\": 0.9},\n  {\"index\": 1, \"score\": 0.8},\n  {\"index\": 2, \"score\": 0.8},\n  {\"index\": 4, \"score\": 0.7},\n  {\"index\": 5, \"score\": 0.6},\n  {\"index\": 6, \"score\": 0.6},\n  {\"index\": 7, \"score\": 0.5}\n]"}
+[LLM][2025-11-13T15:19:26.004+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:19:26.006+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"КР / Коллоны / Пилоны","candidatesCount":8}
+[LLM][2025-11-13T15:19:27.013+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:19:28.699+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:19:28.701+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:19:28.701+03:00] response:content:text {"content":"[\n  {\"index\": 4, \"score\": 1.0},\n  {\"index\": 5, \"score\": 0.9},\n  {\"index\": 0, \"score\": 0.7},\n  {\"index\": 2, \"score\": 0.7},\n  {\"index\": 1, \"score\": 0.5},\n  {\"index\": 3, \"score\": 0.3},\n  {\"index\": 6, \"score\": 0.2},\n  {\"index\": 7, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:19:28.702+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:19:28.704+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"КР / Плиты фундамента","candidatesCount":8}
+[LLM][2025-11-13T15:19:29.709+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:19:31.345+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:19:31.347+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:19:31.347+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.8},\n  {\"index\": 1, \"score\": 0.2},\n  {\"index\": 2, \"score\": 0.3},\n  {\"index\": 3, \"score\": 0.3},\n  {\"index\": 4, \"score\": 0.3},\n  {\"index\": 5, \"score\": 0.2},\n  {\"index\": 6, \"score\": 0.2},\n  {\"index\": 7, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:19:31.348+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:19:31.350+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"КР / Перекрытия / Покрытия / Рампы","candidatesCount":8}
+[LLM][2025-11-13T15:19:32.356+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:19:33.797+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:19:33.798+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:19:33.799+03:00] response:content:text {"content":"[\n  {\"index\": 1, \"score\": 0.9},\n  {\"index\": 5, \"score\": 0.7},\n  {\"index\": 7, \"score\": 0.6},\n  {\"index\": 0, \"score\": 0.5},\n  {\"index\": 6, \"score\": 0.3},\n  {\"index\": 2, \"score\": 0.2},\n  {\"index\": 4, \"score\": 0.2},\n  {\"index\": 3, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:19:33.800+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:19:33.801+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"КР / Балки","candidatesCount":8}
+[LLM][2025-11-13T15:19:34.808+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:19:39.514+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:19:39.516+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:19:39.516+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.8},\n  {\"index\": 1, \"score\": 0.7},\n  {\"index\": 2, \"score\": 0.6},\n  {\"index\": 3, \"score\": 0.2},\n  {\"index\": 4, \"score\": 0.1},\n  {\"index\": 5, \"score\": 0.3},\n  {\"index\": 6, \"score\": 0.2},\n  {\"index\": 7, \"score\": 0.2}\n]"}
+[LLM][2025-11-13T15:19:39.517+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:19:39.519+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"КР / КМ","candidatesCount":8}
+[LLM][2025-11-13T15:19:40.523+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:19:42.169+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:19:42.171+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:19:42.171+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.9},\n  {\"index\": 1, \"score\": 0.8},\n  {\"index\": 2, \"score\": 0.7},\n  {\"index\": 5, \"score\": 0.6},\n  {\"index\": 6, \"score\": 0.5},\n  {\"index\": 7, \"score\": 0.4},\n  {\"index\": 4, \"score\": 0.3},\n  {\"index\": 3, \"score\": 0.2}\n]"}
+[LLM][2025-11-13T15:19:42.172+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:19:42.175+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"КР / Лестницы","candidatesCount":8}
+[LLM][2025-11-13T15:19:43.186+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:19:44.514+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:19:44.519+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:19:44.520+03:00] response:content:text {"content":"[\n  {\"index\": 2, \"score\": 1.0},\n  {\"index\": 1, \"score\": 0.5},\n  {\"index\": 3, \"score\": 0.3},\n  {\"index\": 0, \"score\": 0.2},\n  {\"index\": 4, \"score\": 0.1},\n  {\"index\": 5, \"score\": 0.0},\n  {\"index\": 6, \"score\": 0.0},\n  {\"index\": 7, \"score\": 0.0}\n]"}
+[LLM][2025-11-13T15:19:44.521+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:19:44.522+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ВК (К) / Трубы / Дренаж","candidatesCount":8}
+[LLM][2025-11-13T15:19:45.529+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:19:46.699+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:19:46.700+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:19:46.701+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.9},\n  {\"index\": 1, \"score\": 0.8},\n  {\"index\": 2, \"score\": 0.7},\n  {\"index\": 3, \"score\": 0.7},\n  {\"index\": 4, \"score\": 0.7},\n  {\"index\": 6, \"score\": 0.6},\n  {\"index\": 7, \"score\": 0.6},\n  {\"index\": 5, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:19:46.701+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:19:46.703+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ВК (К) / Оборудование","candidatesCount":8}
+[LLM][2025-11-13T15:19:47.709+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:19:49.448+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:19:49.450+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:19:49.451+03:00] response:content:text {"content":"[\n  {\"index\": 4, \"score\": 0.9},\n  {\"index\": 5, \"score\": 0.8},\n  {\"index\": 6, \"score\": 0.7},\n  {\"index\": 7, \"score\": 0.7},\n  {\"index\": 1, \"score\": 0.6},\n  {\"index\": 2, \"score\": 0.6},\n  {\"index\": 3, \"score\": 0.5},\n  {\"index\": 0, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:19:49.452+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:19:49.454+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ОВ (Вент.) / Воздухораспредел.","candidatesCount":8}
+[LLM][2025-11-13T15:19:50.457+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:19:51.923+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:19:51.925+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:19:51.926+03:00] response:content:text {"content":"[\n  {\"index\": 1, \"score\": 1.0},\n  {\"index\": 0, \"score\": 0.9},\n  {\"index\": 5, \"score\": 0.7},\n  {\"index\": 6, \"score\": 0.7},\n  {\"index\": 3, \"score\": 0.6},\n  {\"index\": 4, \"score\": 0.6},\n  {\"index\": 7, \"score\": 0.5},\n  {\"index\": 2, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:19:51.926+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:19:51.928+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ОВ (Вент.) / Воздуховод","candidatesCount":8}
+[LLM][2025-11-13T15:19:52.944+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:19:54.419+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:19:54.420+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:19:54.421+03:00] response:content:text {"content":"[\n  {\"index\": 2, \"score\": 1.0},\n  {\"index\": 4, \"score\": 0.9},\n  {\"index\": 7, \"score\": 0.8},\n  {\"index\": 1, \"score\": 0.7},\n  {\"index\": 6, \"score\": 0.6},\n  {\"index\": 0, \"score\": 0.5},\n  {\"index\": 3, \"score\": 0.4},\n  {\"index\": 5, \"score\": 0.3}\n]"}
+[LLM][2025-11-13T15:19:54.421+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:19:54.423+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ОВ (Вент.) / Оборудование","candidatesCount":8}
+[LLM][2025-11-13T15:19:55.427+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:19:56.820+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:19:56.822+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:19:56.822+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.1},\n  {\"index\": 1, \"score\": 0.2},\n  {\"index\": 2, \"score\": 0.2},\n  {\"index\": 3, \"score\": 0.2},\n  {\"index\": 4, \"score\": 0.3},\n  {\"index\": 5, \"score\": 0.3},\n  {\"index\": 6, \"score\": 0.4},\n  {\"index\": 7, \"score\": 0.4}\n]"}
+[LLM][2025-11-13T15:19:56.823+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:19:56.825+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ОВ (Отоп.) / Трубы","candidatesCount":8}
+[LLM][2025-11-13T15:19:57.834+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:20:00.082+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:20:00.083+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:20:00.084+03:00] response:content:text {"content":"[\n  {\"index\": 1, \"score\": 1.0},\n  {\"index\": 0, \"score\": 0.9},\n  {\"index\": 5, \"score\": 0.8},\n  {\"index\": 4, \"score\": 0.7},\n  {\"index\": 7, \"score\": 0.6},\n  {\"index\": 3, \"score\": 0.5},\n  {\"index\": 2, \"score\": 0.4},\n  {\"index\": 6, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:20:00.085+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:20:00.086+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ОВ (Отоп.) / Оборудование","candidatesCount":8}
+[LLM][2025-11-13T15:20:01.089+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:20:02.932+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:20:02.934+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:20:02.935+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.8},\n  {\"index\": 1, \"score\": 0.6},\n  {\"index\": 2, \"score\": 0.7},\n  {\"index\": 3, \"score\": 0.7},\n  {\"index\": 4, \"score\": 0.9},\n  {\"index\": 5, \"score\": 0.9},\n  {\"index\": 6, \"score\": 0.7},\n  {\"index\": 7, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:20:02.936+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:20:02.937+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ВК (В) / Трубы","candidatesCount":8}
+[LLM][2025-11-13T15:20:03.947+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:20:06.135+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:20:06.137+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:20:06.137+03:00] response:content:text {"content":"[\n  {\"index\": 1, \"score\": 1.0},\n  {\"index\": 6, \"score\": 0.9},\n  {\"index\": 5, \"score\": 0.8},\n  {\"index\": 3, \"score\": 0.7},\n  {\"index\": 0, \"score\": 0.6},\n  {\"index\": 2, \"score\": 0.5},\n  {\"index\": 4, \"score\": 0.4},\n  {\"index\": 7, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:20:06.138+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:20:06.140+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ВК (В) / Оборудование","candidatesCount":8}
+[LLM][2025-11-13T15:20:07.153+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:20:08.257+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:20:08.259+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:20:08.259+03:00] response:content:text {"content":"[\n  {\"index\": 4, \"score\": 0.9},\n  {\"index\": 5, \"score\": 0.8},\n  {\"index\": 1, \"score\": 0.7},\n  {\"index\": 2, \"score\": 0.6},\n  {\"index\": 6, \"score\": 0.5},\n  {\"index\": 7, \"score\": 0.4},\n  {\"index\": 3, \"score\": 0.3},\n  {\"index\": 0, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:20:08.260+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:20:08.262+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"АУПТ / Оборудование","candidatesCount":8}
+[LLM][2025-11-13T15:20:09.271+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:20:10.986+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:20:10.988+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:20:10.989+03:00] response:content:text {"content":"[\n  {\"index\": 1, \"score\": 0.8},\n  {\"index\": 2, \"score\": 0.7},\n  {\"index\": 3, \"score\": 0.6},\n  {\"index\": 4, \"score\": 0.9},\n  {\"index\": 5, \"score\": 0.85},\n  {\"index\": 6, \"score\": 0.75},\n  {\"index\": 7, \"score\": 0.75},\n  {\"index\": 0, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:20:10.989+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:20:10.991+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"АУПТ / Трубы","candidatesCount":8}
+[LLM][2025-11-13T15:20:11.993+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:20:13.529+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:20:13.531+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:20:13.531+03:00] response:content:text {"content":"[\n  {\"index\": 1, \"score\": 1.0},\n  {\"index\": 0, \"score\": 0.9},\n  {\"index\": 6, \"score\": 0.8},\n  {\"index\": 7, \"score\": 0.8},\n  {\"index\": 3, \"score\": 0.7},\n  {\"index\": 4, \"score\": 0.7},\n  {\"index\": 2, \"score\": 0.3},\n  {\"index\": 5, \"score\": 0.1}\n]"}
+[LLM][2025-11-13T15:20:13.532+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:20:13.534+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"АУПТ / Спринклеры","candidatesCount":8}
+[LLM][2025-11-13T15:20:14.543+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:20:16.527+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:20:16.529+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:20:16.530+03:00] response:content:text {"content":"[\n  {\"index\": 4, \"score\": 0.8},\n  {\"index\": 5, \"score\": 0.7},\n  {\"index\": 6, \"score\": 0.7},\n  {\"index\": 0, \"score\": 0.1},\n  {\"index\": 1, \"score\": 0.1},\n  {\"index\": 2, \"score\": 0.1},\n  {\"index\": 3, \"score\": 0.1},\n  {\"index\": 7, \"score\": 0.0}\n]"}
+[LLM][2025-11-13T15:20:16.531+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:20:16.533+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ЭО, ЭС, ЭМ, СС / Кабельканалы / Лотки","candidatesCount":8}
+[LLM][2025-11-13T15:20:17.534+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:20:19.765+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:20:19.766+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:20:19.767+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 1.0},\n  {\"index\": 1, \"score\": 1.0},\n  {\"index\": 2, \"score\": 0.0},\n  {\"index\": 3, \"score\": 0.0},\n  {\"index\": 4, \"score\": 0.0},\n  {\"index\": 5, \"score\": 0.0},\n  {\"index\": 6, \"score\": 0.0},\n  {\"index\": 7, \"score\": 0.0}\n]"}
+[LLM][2025-11-13T15:20:19.768+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:20:19.770+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ЭО, ЭС, ЭМ, СС / Светильники","candidatesCount":8}
+[LLM][2025-11-13T15:20:20.783+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:20:22.323+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:20:22.324+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:20:22.325+03:00] response:content:text {"content":"[\n  {\"index\": 3, \"score\": 1.0},\n  {\"index\": 4, \"score\": 1.0},\n  {\"index\": 5, \"score\": 1.0},\n  {\"index\": 6, \"score\": 1.0},\n  {\"index\": 0, \"score\": 0.5},\n  {\"index\": 1, \"score\": 0.5},\n  {\"index\": 2, \"score\": 0.5},\n  {\"index\": 7, \"score\": 0.0}\n]"}
+[LLM][2025-11-13T15:20:22.325+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:20:22.327+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ЭО, ЭС, ЭМ, СС / Оборудование","candidatesCount":8}
+[LLM][2025-11-13T15:20:23.342+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:20:24.754+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:20:24.755+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:20:24.756+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 0.1},\n  {\"index\": 1, \"score\": 0.5},\n  {\"index\": 2, \"score\": 0.5},\n  {\"index\": 3, \"score\": 0.5},\n  {\"index\": 4, \"score\": 0.7},\n  {\"index\": 5, \"score\": 0.7},\n  {\"index\": 6, \"score\": 0.8},\n  {\"index\": 7, \"score\": 0.8}\n]"}
+[LLM][2025-11-13T15:20:24.757+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}
+[LLM][2025-11-13T15:20:24.759+03:00] provider:attempt {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","discipline":"ЭО, ЭС, ЭМ, СС / Щиты / Шкафы","candidatesCount":8}
+[LLM][2025-11-13T15:20:25.763+03:00] request:init {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","attempt":0}
+[LLM][2025-11-13T15:20:27.827+03:00] response:status {"status":200,"statusText":"OK","attempt":0}
+[LLM][2025-11-13T15:20:27.829+03:00] response:content:received {"hasContent":true,"attempt":0}
+[LLM][2025-11-13T15:20:27.830+03:00] response:content:text {"content":"[\n  {\"index\": 0, \"score\": 1.0},\n  {\"index\": 1, \"score\": 0.9},\n  {\"index\": 2, \"score\": 0.8},\n  {\"index\": 3, \"score\": 0.0},\n  {\"index\": 4, \"score\": 0.0},\n  {\"index\": 5, \"score\": 0.0},\n  {\"index\": 6, \"score\": 0.0},\n  {\"index\": 7, \"score\": 0.0}\n]"}
+[LLM][2025-11-13T15:20:27.831+03:00] provider:parsed {"baseUrl":"https://api.mistral.ai/v1","model":"mistral-small","resultCount":8}

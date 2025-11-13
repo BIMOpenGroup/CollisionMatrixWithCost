@@ -86,6 +86,26 @@ export function initDB(): Promise<void> {
         )`,
         (err) => {
           if (err) return reject(err)
+        }
+      )
+
+      db.run(
+        `CREATE TABLE IF NOT EXISTS suggestion_events (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          type TEXT NOT NULL CHECK(type IN ('discipline','element')),
+          suggestion_id INTEGER NOT NULL,
+          action TEXT NOT NULL CHECK(action IN ('accepted','rejected')),
+          price_id INTEGER NOT NULL,
+          source TEXT,
+          source_page TEXT,
+          discipline TEXT,
+          grp TEXT,
+          element TEXT,
+          axis TEXT CHECK(axis IN ('row','col')),
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`,
+        (err) => {
+          if (err) return reject(err)
           resolve()
         }
       )
@@ -213,6 +233,19 @@ export function getPrices(limit = 100): Promise<StoredPriceRow[]> {
   })
 }
 
+export function getPriceById(id: number): Promise<StoredPriceRow | null> {
+  return new Promise((resolve, reject) => {
+    db.get(
+      `SELECT id, category, name, unit, price, currency, source, source_page, extra FROM prices WHERE id = ?`,
+      [id],
+      (err, row) => {
+        if (err) return reject(err)
+        resolve((row as StoredPriceRow) || null)
+      }
+    )
+  })
+}
+
 export type MappingSuggestionInput = {
   discipline: string
   price_id: number
@@ -259,19 +292,47 @@ export function bulkInsertMappingSuggestions(suggestions: MappingSuggestionInput
   })
 }
 
-export function getMappingSuggestions(discipline?: string, limit = 50): Promise<MappingSuggestion[]> {
+export function getMappingSuggestions(
+  discipline?: string,
+  limit = 50
+): Promise<(MappingSuggestion & { price_name?: string; price_unit?: string; price_category?: string; price?: number; price_currency?: string; price_source?: string; price_source_page?: string })[]> {
   return new Promise((resolve, reject) => {
-    const base = `SELECT id, discipline, price_id, score, method, status, created_at
-                  FROM mapping_suggestions`
+    const base = `SELECT ms.id, ms.discipline, ms.price_id, ms.score, ms.method, ms.status, ms.created_at,
+                         p.name AS price_name, p.unit AS price_unit, p.category AS price_category, p.price AS price, p.currency AS price_currency,
+                         p.source AS price_source, p.source_page AS price_source_page
+                  FROM mapping_suggestions ms
+                  LEFT JOIN prices p ON p.id = ms.price_id`
     const where = discipline ? ` WHERE discipline = ?` : ''
     db.all(
       base + where + ` ORDER BY (score IS NULL), score DESC, created_at DESC LIMIT ?`,
       discipline ? [discipline, limit] : [limit],
       (err, rows) => {
         if (err) return reject(err)
-        resolve(rows as MappingSuggestion[])
+        resolve(rows as any)
       }
     )
+  })
+}
+
+export function getMappingSuggestionById(id: number): Promise<MappingSuggestion | null> {
+  return new Promise((resolve, reject) => {
+    db.get(
+      `SELECT id, discipline, price_id, score, method, status, created_at FROM mapping_suggestions WHERE id = ?`,
+      [id],
+      (err, row) => {
+        if (err) return reject(err)
+        resolve((row as MappingSuggestion) || null)
+      }
+    )
+  })
+}
+
+export function updateMappingSuggestionStatus(id: number, status: 'accepted' | 'rejected' | 'proposed'): Promise<void> {
+  return new Promise((resolve, reject) => {
+    db.run(`UPDATE mapping_suggestions SET status = ? WHERE id = ?`, [status, id], (err) => {
+      if (err) return reject(err)
+      resolve()
+    })
   })
 }
 
@@ -315,7 +376,7 @@ export function bulkInsertElementSuggestions(suggestions: ElementSuggestionInput
 export function getElementSuggestions(
   filter: { grp?: string; element?: string; axis?: 'row' | 'col' },
   limit = 50
-): Promise<(ElementSuggestion & { price_name?: string; price_unit?: string; price_category?: string; price?: number; price_currency?: string })[]> {
+): Promise<(ElementSuggestion & { price_name?: string; price_unit?: string; price_category?: string; price?: number; price_currency?: string; price_source?: string; price_source_page?: string })[]> {
   return new Promise((resolve, reject) => {
     const whereParts: string[] = []
     const params: any[] = []
@@ -333,7 +394,8 @@ export function getElementSuggestions(
     }
     const where = whereParts.length ? ` WHERE ${whereParts.join(' AND ')}` : ''
     const sql = `SELECT es.id, es.grp, es.element, es.axis, es.price_id, es.score, es.method, es.status, es.created_at,
-                        p.name AS price_name, p.unit AS price_unit, p.category AS price_category, p.price AS price, p.currency AS price_currency
+                        p.name AS price_name, p.unit AS price_unit, p.category AS price_category, p.price AS price, p.currency AS price_currency,
+                        p.source AS price_source, p.source_page AS price_source_page
                  FROM element_suggestions es
                  LEFT JOIN prices p ON p.id = es.price_id${where}
                  ORDER BY (es.score IS NULL), es.score DESC, es.created_at DESC
@@ -343,5 +405,77 @@ export function getElementSuggestions(
       if (err) return reject(err)
       resolve(rows as any)
     })
+  })
+}
+
+export function getElementSuggestionById(id: number): Promise<ElementSuggestion | null> {
+  return new Promise((resolve, reject) => {
+    db.get(
+      `SELECT id, grp, element, axis, price_id, score, method, status, created_at FROM element_suggestions WHERE id = ?`,
+      [id],
+      (err, row) => {
+        if (err) return reject(err)
+        resolve((row as ElementSuggestion) || null)
+      }
+    )
+  })
+}
+
+export function updateElementSuggestionStatus(id: number, status: 'accepted' | 'rejected' | 'proposed'): Promise<void> {
+  return new Promise((resolve, reject) => {
+    db.run(`UPDATE element_suggestions SET status = ? WHERE id = ?`, [status, id], (err) => {
+      if (err) return reject(err)
+      resolve()
+    })
+  })
+}
+
+export function insertSuggestionEvent(row: {
+  type: 'discipline' | 'element'
+  suggestion_id: number
+  action: 'accepted' | 'rejected'
+  price_id: number
+  source?: string | null
+  source_page?: string | null
+  discipline?: string | null
+  grp?: string | null
+  element?: string | null
+  axis?: 'row' | 'col' | null
+}): Promise<void> {
+  return new Promise((resolve, reject) => {
+    db.run(
+      `INSERT INTO suggestion_events (type, suggestion_id, action, price_id, source, source_page, discipline, grp, element, axis)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        row.type,
+        row.suggestion_id,
+        row.action,
+        row.price_id,
+        row.source || null,
+        row.source_page || null,
+        row.discipline || null,
+        row.grp || null,
+        row.element || null,
+        row.axis || null,
+      ],
+      (err) => {
+        if (err) return reject(err)
+        resolve()
+      }
+    )
+  })
+}
+
+export function getSuggestionEvents(limit = 200): Promise<Array<{ id: number; type: string; suggestion_id: number; action: string; price_id: number; source?: string; source_page?: string; discipline?: string; grp?: string; element?: string; axis?: string; created_at: string }>> {
+  return new Promise((resolve, reject) => {
+    db.all(
+      `SELECT id, type, suggestion_id, action, price_id, source, source_page, discipline, grp, element, axis, created_at
+       FROM suggestion_events ORDER BY created_at DESC LIMIT ?`,
+      [limit],
+      (err, rows) => {
+        if (err) return reject(err)
+        resolve(rows as any)
+      }
+    )
   })
 }
