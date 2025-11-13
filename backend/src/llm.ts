@@ -3,6 +3,7 @@ import fs from 'fs'
 import path from 'path'
 
 export type LLMRankResult = { index: number; score: number }
+export type LLMDecision = { suggestion_id?: number; price_id?: number; action: 'accept' | 'reject'; quantity?: number; unit_price?: number }
 
 type ChatMessage = { role: 'system' | 'user' | 'assistant'; content: string }
 
@@ -125,6 +126,31 @@ function parseRankJson(content: string): LLMRankResult[] | null {
   }
 }
 
+function parseDecisionJson(content: string): LLMDecision[] | null {
+  try {
+    const parsed = JSON.parse(content)
+    const arr = Array.isArray(parsed) ? parsed : parsed?.decisions || []
+    const results: LLMDecision[] = []
+    for (const item of arr) {
+      const action = String((item as any).action || '').toLowerCase() as 'accept' | 'reject'
+      if (action !== 'accept' && action !== 'reject') continue
+      const suggestion_id = (item as any).suggestion_id
+      const price_id = (item as any).price_id
+      const quantity = (item as any).quantity
+      const unit_price = (item as any).unit_price
+      const out: LLMDecision = { action }
+      if (Number.isFinite(Number(suggestion_id))) out.suggestion_id = Number(suggestion_id)
+      if (Number.isFinite(Number(price_id))) out.price_id = Number(price_id)
+      if (Number.isFinite(Number(quantity))) out.quantity = Number(quantity)
+      if (Number.isFinite(Number(unit_price))) out.unit_price = Number(unit_price)
+      results.push(out)
+    }
+    return results.length ? results : null
+  } catch {
+    return null
+  }
+}
+
 export async function llmRerank(
   discipline: string,
   candidates: Array<{ name: string; unit?: string; category?: string }>
@@ -170,4 +196,34 @@ function getLLMConfig(): { baseUrl: string; apiKey: string; model: string } | nu
   baseUrl.trim()
   model.trim()
   return { baseUrl, apiKey, model }
+}
+
+export async function llmDecideCell(
+  context: string,
+  candidates: Array<{ suggestion_id: number; price_id: number; name: string; unit?: string; category?: string; score?: number }>
+): Promise<LLMDecision[] | null> {
+  const cfg = getLLMConfig()
+  if (!cfg) return null
+  const system = `Ты помощник-сметчик. На входе ячейка матрицы и список предложений.
+Задача: решить какие принять/отклонить. Верни JSON-массив [{suggestion_id, action, quantity?, unit_price?}].`
+  const user = `Ячейка: ${context}
+Предложения:
+${candidates
+    .map((c) => `- suggestion_id=${c.suggestion_id}; price_id=${c.price_id}; name=${c.name}${c.unit ? ` (${c.unit})` : ''}${c.category ? `; category=${c.category}` : ''}${typeof c.score === 'number' ? `; score=${c.score}` : ''}`)
+    .join('\n')}`
+
+  const messages: ChatMessage[] = [
+    { role: 'system', content: system },
+    { role: 'user', content: user },
+  ]
+  try {
+    debugLog('provider:attempt:decide', { baseUrl: cfg.baseUrl, model: cfg.model, context, candidatesCount: candidates.length })
+    const content = await chatCompletionOpenAICompatible({ baseUrl: cfg.baseUrl, apiKey: cfg.apiKey, model: cfg.model, messages, temperature: 0.1 })
+    const parsed = content ? parseDecisionJson(content) : null
+    debugLog('provider:parsed:decide', { baseUrl: cfg.baseUrl, model: cfg.model, resultCount: parsed?.length || 0 })
+    if (parsed && parsed.length) return parsed
+  } catch (e: any) {
+    debugLog('provider:error:decide', { baseUrl: cfg.baseUrl, model: cfg.model, error: e?.message || String(e) })
+  }
+  return null
 }

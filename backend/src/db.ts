@@ -92,7 +92,7 @@ export function initDB(): Promise<void> {
       db.run(
         `CREATE TABLE IF NOT EXISTS suggestion_events (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          type TEXT NOT NULL CHECK(type IN ('discipline','element')),
+          type TEXT NOT NULL CHECK(type IN ('discipline','element','cell')),
           suggestion_id INTEGER NOT NULL,
           action TEXT NOT NULL CHECK(action IN ('accepted','rejected')),
           price_id INTEGER NOT NULL,
@@ -102,7 +102,66 @@ export function initDB(): Promise<void> {
           grp TEXT,
           element TEXT,
           axis TEXT CHECK(axis IN ('row','col')),
+          cell_id INTEGER,
+          row_index INTEGER,
+          col_index INTEGER,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`,
+        (err) => {
+          if (err) return reject(err)
+        }
+      )
+
+      db.run(
+        `CREATE TABLE IF NOT EXISTS cell_keys (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          row_index INTEGER NOT NULL,
+          col_index INTEGER NOT NULL,
+          row_group TEXT NOT NULL,
+          row_label TEXT NOT NULL,
+          col_group TEXT NOT NULL,
+          col_label TEXT NOT NULL,
+          UNIQUE(row_index, col_index)
+        )`,
+        (err) => {
+          if (err) return reject(err)
+        }
+      )
+
+      db.run(
+        `CREATE TABLE IF NOT EXISTS cell_suggestions (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          cell_id INTEGER NOT NULL,
+          work_type TEXT,
+          price_id INTEGER NOT NULL,
+          score REAL,
+          method TEXT,
+          status TEXT DEFAULT 'proposed' CHECK(status IN ('proposed','accepted','rejected')),
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(cell_id, price_id, work_type),
+          FOREIGN KEY(cell_id) REFERENCES cell_keys(id) ON DELETE CASCADE,
+          FOREIGN KEY(price_id) REFERENCES prices(id) ON DELETE CASCADE
+        )`,
+        (err) => {
+          if (err) return reject(err)
+        }
+      )
+
+      db.run(
+        `CREATE TABLE IF NOT EXISTS cell_items (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          cell_id INTEGER NOT NULL,
+          work_type TEXT,
+          price_id INTEGER NOT NULL,
+          quantity REAL,
+          unit_price REAL,
+          currency TEXT DEFAULT 'RUB',
+          total REAL,
+          source TEXT,
+          source_page TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY(cell_id) REFERENCES cell_keys(id) ON DELETE CASCADE,
+          FOREIGN KEY(price_id) REFERENCES prices(id) ON DELETE CASCADE
         )`,
         (err) => {
           if (err) return reject(err)
@@ -477,5 +536,185 @@ export function getSuggestionEvents(limit = 200): Promise<Array<{ id: number; ty
         resolve(rows as any)
       }
     )
+  })
+}
+
+export function bulkUpsertCellKeys(rows: Array<{ row_index: number; col_index: number; row_group: string; row_label: string; col_group: string; col_label: string }>): Promise<number> {
+  return new Promise((resolve, reject) => {
+    db.serialize(() => {
+      const stmt = db.prepare(
+        `INSERT INTO cell_keys (row_index, col_index, row_group, row_label, col_group, col_label)
+         VALUES (?, ?, ?, ?, ?, ?)
+         ON CONFLICT(row_index, col_index) DO UPDATE SET
+           row_group=excluded.row_group,
+           row_label=excluded.row_label,
+           col_group=excluded.col_group,
+           col_label=excluded.col_label`
+      )
+      let count = 0
+      for (const r of rows) {
+        stmt.run([r.row_index, r.col_index, r.row_group, r.row_label, r.col_group, r.col_label], (err) => {
+          if (err) return reject(err)
+          count++
+        })
+      }
+      stmt.finalize((err) => {
+        if (err) return reject(err)
+        resolve(count)
+      })
+    })
+  })
+}
+
+export function getCellKeyByIndices(row_index: number, col_index: number): Promise<{ id: number; row_group: string; row_label: string; col_group: string; col_label: string } | null> {
+  return new Promise((resolve, reject) => {
+    db.get(
+      `SELECT id, row_group, row_label, col_group, col_label FROM cell_keys WHERE row_index = ? AND col_index = ?`,
+      [row_index, col_index],
+      (err, row) => {
+        if (err) return reject(err)
+        resolve((row as any) || null)
+      }
+    )
+  })
+}
+
+export function bulkInsertCellSuggestions(rows: Array<{ cell_id: number; work_type?: string | null; price_id: number; score?: number; method?: string; status?: 'proposed' | 'accepted' | 'rejected' }>): Promise<number> {
+  return new Promise((resolve, reject) => {
+    db.serialize(() => {
+      const stmt = db.prepare(
+        `INSERT OR REPLACE INTO cell_suggestions (cell_id, work_type, price_id, score, method, status)
+         VALUES (?, ?, ?, ?, ?, COALESCE(?, 'proposed'))`
+      )
+      let count = 0
+      for (const r of rows) {
+        stmt.run([r.cell_id, r.work_type || null, r.price_id, typeof r.score === 'number' ? r.score : null, r.method || null, r.status || null], (err) => {
+          if (err) return reject(err)
+          count++
+        })
+      }
+      stmt.finalize((err) => {
+        if (err) return reject(err)
+        resolve(count)
+      })
+    })
+  })
+}
+
+export function getCellSuggestions(cell_id: number, filter: { work_type?: string }, limit = 50): Promise<Array<{ id: number; cell_id: number; work_type?: string; price_id: number; score?: number; method?: string; status?: string; created_at: string; price_name?: string; price_unit?: string; price_category?: string; price?: number; price_currency?: string; price_source?: string; price_source_page?: string }>> {
+  return new Promise((resolve, reject) => {
+    const whereParts: string[] = [`cs.cell_id = ?`]
+    const params: any[] = [cell_id]
+    if (filter.work_type) {
+      whereParts.push('cs.work_type = ?')
+      params.push(filter.work_type)
+    }
+    const where = ` WHERE ${whereParts.join(' AND ')}`
+    const sql = `SELECT cs.id, cs.cell_id, cs.work_type, cs.price_id, cs.score, cs.method, cs.status, cs.created_at,
+                        p.name AS price_name, p.unit AS price_unit, p.category AS price_category, p.price AS price, p.currency AS price_currency,
+                        p.source AS price_source, p.source_page AS price_source_page
+                 FROM cell_suggestions cs
+                 LEFT JOIN prices p ON p.id = cs.price_id${where}
+                 ORDER BY (cs.score IS NULL), cs.score DESC, cs.created_at DESC
+                 LIMIT ?`
+    params.push(limit)
+    db.all(sql, params, (err, rows) => {
+      if (err) return reject(err)
+      resolve(rows as any)
+    })
+  })
+}
+
+export function updateCellSuggestionStatus(id: number, status: 'accepted' | 'rejected' | 'proposed'): Promise<void> {
+  return new Promise((resolve, reject) => {
+    db.run(`UPDATE cell_suggestions SET status = ? WHERE id = ?`, [status, id], (err) => {
+      if (err) return reject(err)
+      resolve()
+    })
+  })
+}
+
+export function getCellSuggestionById(id: number): Promise<{ id: number; cell_id: number; price_id: number; status: string } | null> {
+  return new Promise((resolve, reject) => {
+    db.get(`SELECT id, cell_id, price_id, status FROM cell_suggestions WHERE id = ?`, [id], (err, row) => {
+      if (err) return reject(err)
+      resolve((row as any) || null)
+    })
+  })
+}
+
+export function insertCellItem(row_index: number, col_index: number, payload: { work_type?: string | null; price_id: number; quantity?: number | null; unit_price?: number | null }): Promise<void> {
+  return new Promise((resolve, reject) => {
+    getCellKeyByIndices(row_index, col_index)
+      .then((cell) => {
+        if (!cell) throw new Error('Cell key not found')
+        db.get(`SELECT price, currency, source, source_page FROM prices WHERE id = ?`, [payload.price_id], (err, prow: any) => {
+          if (err) return reject(err)
+          const unitPrice = typeof payload.unit_price === 'number' ? payload.unit_price : (typeof prow?.price === 'number' ? prow.price : null)
+          const qty = typeof payload.quantity === 'number' ? payload.quantity : 1
+          const total = unitPrice && qty ? unitPrice * qty : null
+          db.run(
+            `INSERT INTO cell_items (cell_id, work_type, price_id, quantity, unit_price, currency, total, source, source_page)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [cell.id, payload.work_type || null, payload.price_id, qty || null, unitPrice || null, prow?.currency || 'RUB', total || null, prow?.source || null, prow?.source_page || null],
+            (e2) => {
+              if (e2) return reject(e2)
+              resolve()
+            }
+          )
+        })
+      })
+      .catch(reject)
+  })
+}
+
+export function getCellItems(row_index: number, col_index: number): Promise<Array<{ id: number; cell_id: number; work_type?: string; price_id: number; quantity?: number; unit_price?: number; currency?: string; total?: number; source?: string; source_page?: string; created_at: string }>> {
+  return new Promise((resolve, reject) => {
+    getCellKeyByIndices(row_index, col_index)
+      .then((cell) => {
+        if (!cell) return resolve([])
+        db.all(`SELECT id, cell_id, work_type, price_id, quantity, unit_price, currency, total, source, source_page, created_at FROM cell_items WHERE cell_id = ? ORDER BY created_at DESC`, [cell.id], (err, rows) => {
+          if (err) return reject(err)
+          resolve(rows as any)
+        })
+      })
+      .catch(reject)
+  })
+}
+
+export function getCellSummary(): Promise<Array<{ row_index: number; col_index: number; min?: number; max?: number; sum?: number }>> {
+  return new Promise((resolve, reject) => {
+    const sql = `SELECT ck.row_index, ck.col_index,
+                        MIN(ci.total) AS min, MAX(ci.total) AS max, SUM(ci.total) AS sum
+                 FROM cell_keys ck
+                 LEFT JOIN cell_items ci ON ci.cell_id = ck.id
+                 GROUP BY ck.row_index, ck.col_index`
+    db.all(sql, [], (err, rows) => {
+      if (err) return reject(err)
+      resolve(rows as any)
+    })
+  })
+}
+
+export function getCellStatusSummary(): Promise<Array<{ row_index: number; col_index: number; total: number; accepted: number; rejected: number; proposed: number; status: string }>> {
+  return new Promise((resolve, reject) => {
+    const sql = `SELECT ck.row_index, ck.col_index,
+                        COUNT(cs.id) AS total,
+                        SUM(CASE WHEN cs.status = 'accepted' THEN 1 ELSE 0 END) AS accepted,
+                        SUM(CASE WHEN cs.status = 'rejected' THEN 1 ELSE 0 END) AS rejected,
+                        SUM(CASE WHEN cs.status = 'proposed' THEN 1 ELSE 0 END) AS proposed,
+                        CASE
+                          WHEN COUNT(cs.id) > 0 AND SUM(CASE WHEN cs.status = 'accepted' THEN 1 ELSE 0 END) = COUNT(cs.id) THEN 'all_accepted'
+                          WHEN COUNT(cs.id) > 0 AND SUM(CASE WHEN cs.status = 'rejected' THEN 1 ELSE 0 END) = COUNT(cs.id) THEN 'all_rejected'
+                          WHEN COUNT(cs.id) = 0 THEN 'none'
+                          ELSE 'mixed'
+                        END AS status
+                 FROM cell_keys ck
+                 LEFT JOIN cell_suggestions cs ON cs.cell_id = ck.id
+                 GROUP BY ck.row_index, ck.col_index`
+    db.all(sql, [], (err, rows) => {
+      if (err) return reject(err)
+      resolve(rows as any)
+    })
   })
 }

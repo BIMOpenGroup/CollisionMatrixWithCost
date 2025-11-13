@@ -31,7 +31,7 @@ function App() {
   const [selected, setSelected] = useState<{ grp: string; element: string } | null>(null)
   const [suggestions, setSuggestions] = useState<Array<{ id: number; price_id: number; price_name?: string; price_unit?: string; price_category?: string; price_source?: string; price_source_page?: string; score?: number; status?: 'proposed' | 'accepted' | 'rejected' }>>([])
   const [loadingSug, setLoadingSug] = useState(false)
-  const [tab, setTab] = useState<'matrix' | 'elements' | 'disciplines' | 'llm' | 'events'>('matrix')
+  const [tab, setTab] = useState<'matrix' | 'cost' | 'elements' | 'disciplines' | 'llm' | 'events'>('matrix')
   const [genMsg, setGenMsg] = useState<string>('')
   const [disciplines, setDisciplines] = useState<Array<{ id: number; name: string; scope: string }>>([])
   const [selectedDiscipline, setSelectedDiscipline] = useState<string>('')
@@ -42,12 +42,34 @@ function App() {
   const [providers, setProviders] = useState<Array<{ name: string; baseUrl: string; model: string; apiKeyPresent: boolean }>>([])
   const [llmPing, setLlmPing] = useState<{ provider?: string; content?: string } | null>(null)
   const [llmPingMsg, setLlmPingMsg] = useState<string>('test')
+  const [cellSummary, setCellSummary] = useState<Array<{ row_index: number; col_index: number; min?: number; max?: number; sum?: number }>>([])
+  const [cellStatuses, setCellStatuses] = useState<Array<{ row_index: number; col_index: number; status: string }>>([])
+  const [cellPanel, setCellPanel] = useState<{ rowIndex: number; colIndex: number; rowLabel?: string; colLabel?: string; rowGroup?: string; colGroup?: string } | null>(null)
+  const [cellWorkType, setCellWorkType] = useState<string>('')
+  const [cellSug, setCellSug] = useState<Array<{ id: number; price_id: number; price_name?: string; price_unit?: string; price_category?: string; price_source?: string; price_source_page?: string; score?: number; status?: 'proposed' | 'accepted' | 'rejected'; work_type?: string }>>([])
+  const [cellItems, setCellItems] = useState<Array<{ id: number; price_id: number; quantity?: number; unit_price?: number; currency?: string; total?: number; source?: string; source_page?: string; work_type?: string }>>([])
 
   useEffect(() => {
     loadMatrixAuto()
       .then((j) => setData(j))
       .catch((e) => console.error(e))
   }, [])
+
+  const loadCellSummary = async () => {
+    try {
+      const r = await fetch('http://localhost:3001/api/cells/summary')
+      const j = await r.json()
+      setCellSummary((j?.summary || []) as any)
+    } catch (e) { console.error(e) }
+  }
+
+  const loadCellStatuses = async () => {
+    try {
+      const r = await fetch('http://localhost:3001/api/cells/status-summary')
+      const j = await r.json()
+      setCellStatuses(((j?.statuses || []) as any).map((s: any) => ({ row_index: s.row_index, col_index: s.col_index, status: s.status })))
+    } catch (e) { console.error(e) }
+  }
 
   useEffect(() => {
     fetch('http://localhost:3001/api/disciplines')
@@ -240,6 +262,7 @@ function App() {
       <h1>Матрица коллизий (пример)</h1>
       <div className="actions">
         <button onClick={() => setTab('matrix')}>Матрица</button>
+        <button onClick={() => setTab('cost')}>Матрица со стоимостью</button>
         <button onClick={() => setTab('elements')}>Элементы</button>
         <button onClick={() => setTab('disciplines')}>Дисциплины</button>
         <button onClick={() => { setTab('llm'); loadProviders() }}>LLM</button>
@@ -382,6 +405,192 @@ function App() {
           )}
         </>
       ) : null}
+      {data && tab === 'cost' && (
+        <>
+          <div className="actions">
+            <button onClick={() => fetch('http://localhost:3001/api/cells/init', { method: 'POST' }).then(() => { loadCellSummary(); loadCellStatuses() })}>Синхронизировать ячейки</button>
+            <button onClick={() => { loadCellSummary(); loadCellStatuses() }}>Обновить сводку</button>
+          </div>
+          <div className="matrix-wrap">
+            <table className="matrix">
+              <thead>
+                <tr className="head-groups">
+                  <th className="corner" rowSpan={2}>Группа</th>
+                  <th className="element-header" rowSpan={2}>Элемент</th>
+                  {colSegments.map((seg, si) => (
+                    <Fragment key={`cg-${si}`}>
+                      <th className="group-header" colSpan={seg.length}>{seg.group}</th>
+                      {si < colSegments.length - 1 && <th className="col-sep" />}
+                    </Fragment>
+                  ))}
+                </tr>
+                <tr className="head-labels">
+                  {colSegments.map((seg, si) => (
+                    <Fragment key={`cl-${si}`}>
+                      {data!.columns.slice(seg.start, seg.start + seg.length).map((c, i) => (
+                        <th key={`cc-${seg.start + i}`} className="col-header">
+                          <div className="label">{c.label}</div>
+                        </th>
+                      ))}
+                      {si < colSegments.length - 1 && <th className="col-sep" />}
+                    </Fragment>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {rowSegments.map((rseg, rsi) => (
+                  <Fragment key={`crs-${rsi}`}>
+                    {Array.from({ length: rseg.length }).map((_, off) => {
+                      const ri = rseg.start + off
+                      const r = data!.rows[ri]
+                      const rowVals = data!.grid[ri]
+                      return (
+                        <tr key={`cr-${ri}`}>
+                          {off === 0 && (
+                            <th className="row-group" rowSpan={rseg.length}>{rseg.group}</th>
+                          )}
+                          <th className="row-header">
+                            <div className="label">{r.label}</div>
+                          </th>
+                          {colSegments.map((cseg, csi) => (
+                            <Fragment key={`ccs-${csi}`}>
+                              {rowVals.slice(cseg.start, cseg.start + cseg.length).map((_, ci) => {
+                                const ciAbs = cseg.start + ci
+                                const summary = cellSummary.find((s) => s.row_index === ri && s.col_index === ciAbs)
+                                const display = summary ? (summary.min && summary.max && summary.min !== summary.max ? `${(summary.min || 0).toFixed(2)}–${(summary.max || 0).toFixed(2)}` : (typeof summary.sum === 'number' ? summary.sum.toFixed(2) : '—')) : '—'
+                                const st = cellStatuses.find((x) => x.row_index === ri && x.col_index === ciAbs)?.status || ''
+                                const bg = st === 'all_accepted' ? '#C6EFCE' : st === 'all_rejected' ? '#F2DCDB' : undefined
+                                return (
+                                  <td
+                                    key={`ccell-${ri}-${ciAbs}`}
+                                    className="cell"
+                                    style={{ cursor: 'pointer', backgroundColor: bg }}
+                                    onClick={() => {
+                                      setCellPanel({ rowIndex: ri, colIndex: ciAbs, rowLabel: r.label, rowGroup: rseg.group, colLabel: data!.columns[ciAbs].label, colGroup: data!.columns[ciAbs].group })
+                                      fetch(`http://localhost:3001/api/cells/${ri}/${ciAbs}/items`).then((r) => r.json()).then((j) => setCellItems((j?.items || []) as any))
+                                      fetch(`http://localhost:3001/api/cells/${ri}/${ciAbs}/suggestions?limit=20`).then((r) => r.json()).then((j) => setCellSug((j?.suggestions || []) as any))
+                                    }}
+                                    title={`Σ ${display}`}
+                                  >
+                                    {display}
+                                  </td>
+                                )
+                              })}
+                              {csi < colSegments.length - 1 && <td className="col-sep" />}
+                            </Fragment>
+                          ))}
+                        </tr>
+                      )
+                    })}
+                    {rsi < rowSegments.length - 1 && (
+                      <tr className="row-sep">
+                        <td colSpan={2 + data!.columns.length + (colSegments.length - 1)}></td>
+                      </tr>
+                    )}
+                  </Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {cellPanel && (
+            <div className="suggestions">
+              <div className="sug-head">
+                Расчёт: <b>{cellPanel.rowGroup} / {cellPanel.rowLabel} × {cellPanel.colGroup} / {cellPanel.colLabel}</b>
+              </div>
+              <div className="actions">
+                <button onClick={() => fetch(`http://localhost:3001/api/cells/${cellPanel.rowIndex}/${cellPanel.colIndex}/suggest`, { method: 'POST' }).then(() => fetch(`http://localhost:3001/api/cells/${cellPanel.rowIndex}/${cellPanel.colIndex}/suggestions?limit=20`).then((r) => r.json()).then((j) => setCellSug((j?.suggestions || []) as any)))}>Сгенерировать предложения (ячейка)</button>
+                <button onClick={() => fetch(`http://localhost:3001/api/cells/${cellPanel.rowIndex}/${cellPanel.colIndex}/auto-approve`, { method: 'POST' }).then(() => { fetch(`http://localhost:3001/api/cells/${cellPanel.rowIndex}/${cellPanel.colIndex}/suggestions?limit=20`).then((r) => r.json()).then((j) => setCellSug((j?.suggestions || []) as any)); fetch(`http://localhost:3001/api/cells/${cellPanel.rowIndex}/${cellPanel.colIndex}/items`).then((r) => r.json()).then((j) => setCellItems((j?.items || []) as any)); loadCellSummary(); loadCellStatuses() })} style={{ marginLeft: 8 }}>Авто‑одобрить (LLM)</button>
+                <select value={cellWorkType} onChange={(e) => { const v = e.target.value; setCellWorkType(v); fetch(`http://localhost:3001/api/cells/${cellPanel.rowIndex}/${cellPanel.colIndex}/suggestions?work_type=${encodeURIComponent(v)}&limit=20`).then((r) => r.json()).then((j) => setCellSug((j?.suggestions || []) as any)) }}>
+                  <option value="">Все виды работ</option>
+                  {Array.from(new Set(cellSug.map((s) => s.work_type).filter(Boolean))).map((wt, i) => (
+                    <option key={`${wt}-${i}`} value={wt as string}>{wt as string}</option>
+                  ))}
+                </select>
+              </div>
+              <table className="sug-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Вид работ</th>
+                    <th>Наименование</th>
+                    <th>Ед.</th>
+                    <th>Категория</th>
+                    <th>Score</th>
+                    <th>Источник</th>
+                    <th>Действие</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cellSug.map((s) => (
+                    <tr key={s.id}>
+                      <td>{s.price_id}</td>
+                      <td>{s.work_type || '—'}</td>
+                      <td>{s.price_name || '—'}</td>
+                      <td>{s.price_unit || '—'}</td>
+                      <td>{s.price_category || '—'}</td>
+                      <td>{typeof s.score === 'number' ? s.score.toFixed(2) : '—'}</td>
+                      <td>
+                        {s.price_source_page ? (
+                          <a href={s.price_source_page} target="_blank" rel="noreferrer">{s.price_source || 'источник'}</a>
+                        ) : (
+                          s.price_source || '—'
+                        )}
+                      </td>
+                      <td>
+                        {s.status !== 'accepted' && (
+                          <button onClick={() => fetch(`http://localhost:3001/api/cells/suggestions/${s.id}/status`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'accepted' }) }).then(() => setCellSug((prev) => prev.map((x) => (x.id === s.id ? { ...x, status: 'accepted' } : x))))}>Принять</button>
+                        )}
+                        {s.status !== 'rejected' && (
+                          <button onClick={() => fetch(`http://localhost:3001/api/cells/suggestions/${s.id}/status`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'rejected' }) }).then(() => setCellSug((prev) => prev.map((x) => (x.id === s.id ? { ...x, status: 'rejected' } : x))))} style={{ marginLeft: 8 }}>Отклонить</button>
+                        )}
+                        <button style={{ marginLeft: 8 }} onClick={() => fetch(`http://localhost:3001/api/cells/${cellPanel.rowIndex}/${cellPanel.colIndex}/items`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ work_type: s.work_type || null, price_id: s.price_id }) }).then(() => { fetch(`http://localhost:3001/api/cells/${cellPanel.rowIndex}/${cellPanel.colIndex}/items`).then((r) => r.json()).then((j) => setCellItems((j?.items || []) as any)); loadCellSummary() })}>Добавить в ячейку</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="sub">Принятые позиции ячейки</div>
+              <table className="sug-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Вид работ</th>
+                    <th>Цена</th>
+                    <th>Кол-во</th>
+                    <th>Ед. цена</th>
+                    <th>Итого</th>
+                    <th>Источник</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cellItems.map((i) => (
+                    <tr key={i.id}>
+                      <td>{i.price_id}</td>
+                      <td>{i.work_type || '—'}</td>
+                      <td>{i.currency || 'RUB'}</td>
+                      <td>{typeof i.quantity === 'number' ? i.quantity : '—'}</td>
+                      <td>{typeof i.unit_price === 'number' ? i.unit_price.toFixed(2) : '—'}</td>
+                      <td>{typeof i.total === 'number' ? i.total.toFixed(2) : '—'}</td>
+                      <td>
+                        {i.source_page ? (
+                          <a href={i.source_page} target="_blank" rel="noreferrer">{i.source || 'источник'}</a>
+                        ) : (
+                          i.source || '—'
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                  {cellItems.length === 0 && (
+                    <tr>
+                      <td colSpan={7} className="sub">Нет принятых позиций</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
+      )}
       {tab === 'elements' && (
         <div className="panel">
           <div className="actions">
@@ -539,3 +748,4 @@ function App() {
 }
 
 export default App
+  

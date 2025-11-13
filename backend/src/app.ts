@@ -2,12 +2,13 @@ import express from 'express'
 import cors from 'cors'
 import path from 'path'
 import fs from 'fs'
-import { insertDiscipline, getDisciplines, bulkInsertPrices, getPrices, getMappingSuggestions, getElementSuggestions, db, getMappingSuggestionById, updateMappingSuggestionStatus, getPriceById, insertSuggestionEvent, getElementSuggestionById, updateElementSuggestionStatus, getSuggestionEvents } from './db'
+import { insertDiscipline, getDisciplines, bulkInsertPrices, getPrices, getMappingSuggestions, getElementSuggestions, db, getMappingSuggestionById, updateMappingSuggestionStatus, getPriceById, insertSuggestionEvent, getElementSuggestionById, updateElementSuggestionStatus, getSuggestionEvents, bulkUpsertCellKeys, getCellKeyByIndices, getCellSuggestions, updateCellSuggestionStatus, insertCellItem, getCellItems, getCellSummary, getCellSuggestionById, getCellStatusSummary } from './db'
 import { scrapeGarantPrices } from './scrapeGarant'
 import { loadMatrixFromCsv, extractDisciplineGroups } from './matrix'
 import { buildSuggestions } from './mapping'
 import { buildElementSuggestions } from './elementMapping'
-import { chatCompletionOpenAICompatible, llmRerank } from './llm'
+import { chatCompletionOpenAICompatible, llmRerank, llmDecideCell } from './llm'
+import { buildCellSuggestions } from './cellMapping'
 
 function countTable(name: string): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -257,6 +258,138 @@ export function createApp() {
       res.json({ ok: true, counts: { disciplines: disciplinesCount, prices: pricesCount, mapping_suggestions: mappingCount, element_suggestions: elementsCount } })
     } catch (e: any) {
       res.status(500).json({ ok: false, error: e?.message || 'Failed to read DB counts' })
+    }
+  })
+
+  app.post('/api/cells/init', async (req, res) => {
+    try {
+      const matrix = loadMatrixFromCsv()
+      const rows: Array<{ row_index: number; col_index: number; row_group: string; row_label: string; col_group: string; col_label: string }> = []
+      for (let ri = 0; ri < matrix.rows.length; ri++) {
+        for (let ci = 0; ci < matrix.columns.length; ci++) {
+          rows.push({ row_index: ri, col_index: ci, row_group: matrix.rows[ri].group, row_label: matrix.rows[ri].label, col_group: matrix.columns[ci].group, col_label: matrix.columns[ci].label })
+        }
+      }
+      const count = await bulkUpsertCellKeys(rows)
+      res.json({ ok: true, count })
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Failed to init cell keys' })
+    }
+  })
+
+  app.post('/api/cells/:rowIndex/:colIndex/suggest', async (req, res) => {
+    try {
+      const rowIndex = Number(req.params.rowIndex)
+      const colIndex = Number(req.params.colIndex)
+      if (!Number.isFinite(rowIndex) || !Number.isFinite(colIndex)) return res.status(400).json({ ok: false, error: 'rowIndex/colIndex required' })
+      const matrix = loadMatrixFromCsv()
+      const prices = await getPrices(10000)
+      const result = await buildCellSuggestions(matrix, rowIndex, colIndex, prices, 8)
+      res.json({ ok: true, ...result })
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Failed to build cell suggestions' })
+    }
+  })
+
+  app.get('/api/cells/:rowIndex/:colIndex/suggestions', async (req, res) => {
+    try {
+      const rowIndex = Number(req.params.rowIndex)
+      const colIndex = Number(req.params.colIndex)
+      const workType = typeof req.query.work_type === 'string' ? req.query.work_type : undefined
+      const key = await getCellKeyByIndices(rowIndex, colIndex)
+      if (!key) return res.json({ ok: true, suggestions: [], total: 0 })
+      const rows = await getCellSuggestions(key.id, { work_type: workType }, req.query.limit ? Number(req.query.limit) : 50)
+      res.json({ ok: true, suggestions: rows, total: rows.length })
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Failed to read cell suggestions' })
+    }
+  })
+
+  app.post('/api/cells/suggestions/:id/status', async (req, res) => {
+    try {
+      const id = Number(req.params.id)
+      const body = typeof req.body === 'object' && req.body ? req.body : {}
+      const status = body.status === 'accepted' || body.status === 'rejected' || body.status === 'proposed' ? body.status : undefined
+      if (!Number.isFinite(id) || !status) return res.status(400).json({ ok: false, error: 'Required: numeric :id and body { status }' })
+      await updateCellSuggestionStatus(id, status)
+      res.json({ ok: true, id, status })
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Failed to update cell suggestion status' })
+    }
+  })
+
+  app.post('/api/cells/:rowIndex/:colIndex/items', async (req, res) => {
+    try {
+      const rowIndex = Number(req.params.rowIndex)
+      const colIndex = Number(req.params.colIndex)
+      const body = typeof req.body === 'object' && req.body ? req.body : {}
+      const price_id = Number(body.price_id)
+      const work_type = typeof body.work_type === 'string' ? body.work_type : undefined
+      const quantity = typeof body.quantity === 'number' ? body.quantity : undefined
+      const unit_price = typeof body.unit_price === 'number' ? body.unit_price : undefined
+      if (!Number.isFinite(rowIndex) || !Number.isFinite(colIndex) || !Number.isFinite(price_id)) return res.status(400).json({ ok: false, error: 'Required: rowIndex, colIndex, price_id' })
+      await insertCellItem(rowIndex, colIndex, { work_type: work_type || null, price_id, quantity: quantity ?? null, unit_price: unit_price ?? null })
+      res.json({ ok: true })
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Failed to insert cell item' })
+    }
+  })
+
+  app.get('/api/cells/:rowIndex/:colIndex/items', async (req, res) => {
+    try {
+      const rowIndex = Number(req.params.rowIndex)
+      const colIndex = Number(req.params.colIndex)
+      const rows = await getCellItems(rowIndex, colIndex)
+      res.json({ ok: true, items: rows, total: rows.length })
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Failed to read cell items' })
+    }
+  })
+
+  app.get('/api/cells/summary', async (req, res) => {
+    try {
+      const rows = await getCellSummary()
+      res.json({ ok: true, summary: rows, total: rows.length })
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Failed to read cell summary' })
+    }
+  })
+
+  app.get('/api/cells/status-summary', async (req, res) => {
+    try {
+      const rows = await getCellStatusSummary()
+      res.json({ ok: true, statuses: rows, total: rows.length })
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Failed to read cell status summary' })
+    }
+  })
+
+  app.post('/api/cells/:rowIndex/:colIndex/auto-approve', async (req, res) => {
+    try {
+      const rowIndex = Number(req.params.rowIndex)
+      const colIndex = Number(req.params.colIndex)
+      if (!Number.isFinite(rowIndex) || !Number.isFinite(colIndex)) return res.status(400).json({ ok: false, error: 'rowIndex/colIndex required' })
+      const key = await getCellKeyByIndices(rowIndex, colIndex)
+      if (!key) return res.status(404).json({ ok: false, error: 'Cell not found' })
+      const suggestions = await getCellSuggestions(key.id, {}, 50)
+      if (!suggestions.length) return res.json({ ok: true, updated: 0 })
+      const decisions = await llmDecideCell(`${key.row_group} / ${key.row_label} × ${key.col_group} / ${key.col_label}`, suggestions.map((s) => ({ suggestion_id: s.id, price_id: s.price_id, name: s.price_name || '', unit: s.price_unit, category: s.price_category, score: s.score })))
+      let updated = 0
+      if (decisions && decisions.length) {
+        for (const d of decisions) {
+          const sugId = d.suggestion_id || suggestions.find((s) => s.price_id === d.price_id)?.id
+          if (!sugId) continue
+          await updateCellSuggestionStatus(sugId, d.action === 'accept' ? 'accepted' : 'rejected')
+          updated++
+          const sugRow = await getCellSuggestionById(sugId)
+          if (sugRow && d.action === 'accept') {
+            await insertCellItem(rowIndex, colIndex, { work_type: null, price_id: sugRow.price_id, quantity: typeof d.quantity === 'number' ? d.quantity : null, unit_price: typeof d.unit_price === 'number' ? d.unit_price : null })
+          }
+        }
+      }
+      res.json({ ok: true, updated })
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Failed to auto-approve cell suggestions' })
     }
   })
 
