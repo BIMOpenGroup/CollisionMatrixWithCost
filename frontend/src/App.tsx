@@ -373,7 +373,6 @@ function App() {
       </div>
       {data && tab === 'matrix' ? (
         <>
-          <div className="meta">Источник: {data.source}</div>
           <div className="actions">
             {data.source.startsWith('api') && (
               <button title="Сохранить группы (строки/колонки) из CSV" disabled={saving} onClick={onSaveDisciplines}>
@@ -455,6 +454,7 @@ function App() {
           <div className="summary">
             Строк: {rowCount} · Колонок: {colCount}
           </div>
+          <div className="meta">Источник: {data.source}</div>
           {selected && (
             <div className="suggestions">
               <div className="sug-head">
