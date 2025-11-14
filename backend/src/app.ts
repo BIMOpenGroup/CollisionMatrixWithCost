@@ -2,7 +2,8 @@ import express from 'express'
 import cors from 'cors'
 import path from 'path'
 import fs from 'fs'
-import { insertDiscipline, getDisciplines, bulkInsertPrices, getPrices, getMappingSuggestions, getElementSuggestions, db, getMappingSuggestionById, updateMappingSuggestionStatus, getPriceById, insertSuggestionEvent, getElementSuggestionById, updateElementSuggestionStatus, getSuggestionEvents, bulkUpsertCellKeys, getCellKeyByIndices, getCellSuggestions, updateCellSuggestionStatus, insertCellItem, getCellItems, getCellSummary, getCellSuggestionById, getCellStatusSummary } from './db'
+import { insertDiscipline, getDisciplines, bulkInsertPrices, getPrices, getMappingSuggestions, getElementSuggestions, db, getMappingSuggestionById, updateMappingSuggestionStatus, getPriceById, insertSuggestionEvent, getElementSuggestionById, updateElementSuggestionStatus, getSuggestionEvents, bulkUpsertCellKeys, getCellKeyByIndices, getCellSuggestions, updateCellSuggestionStatus, insertCellItem, getCellItems, getCellSummary, getCellSuggestionById, getCellStatusSummary, getTaskById, getTaskLogs, getRecentTasks, getCollisionCostByCell, getElementStatusSummary, getCellRiskByCell, getCalcItemsByCell } from './db'
+import { startTask, cancelTask } from './tasks'
 import { scrapeGarantPrices } from './scrapeGarant'
 import { loadMatrixFromCsv, extractDisciplineGroups } from './matrix'
 import { buildSuggestions } from './mapping'
@@ -261,6 +262,64 @@ export function createApp() {
     }
   })
 
+  app.post('/api/tasks/start', async (req, res) => {
+    try {
+      const body = typeof req.body === 'object' && req.body ? req.body : {}
+      const type: string = typeof body.type === 'string' ? body.type : ''
+      const allowed = new Set(['sync_cells','auto_approve_elements','build_cell_suggestions_all','compute_collisions_all','compute_risk_all'])
+      if (!allowed.has(type)) return res.status(400).json({ ok: false, error: 'Invalid type' })
+      const task_id = await startTask(type as any)
+      res.json({ ok: true, task_id })
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Failed to start task' })
+    }
+  })
+
+  app.get('/api/tasks/:id', async (req, res) => {
+    try {
+      const id = Number(req.params.id)
+      if (!Number.isFinite(id)) return res.status(400).json({ ok: false, error: 'Invalid id' })
+      const row = await getTaskById(id)
+      if (!row) return res.status(404).json({ ok: false, error: 'Task not found' })
+      res.json({ ok: true, task: row })
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Failed to read task' })
+    }
+  })
+
+  app.get('/api/tasks/:id/logs', async (req, res) => {
+    try {
+      const id = Number(req.params.id)
+      const limit = req.query.limit ? Number(req.query.limit) : 200
+      if (!Number.isFinite(id)) return res.status(400).json({ ok: false, error: 'Invalid id' })
+      const rows = await getTaskLogs(id, limit)
+      res.json({ ok: true, logs: rows, total: rows.length })
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Failed to read task logs' })
+    }
+  })
+
+  app.get('/api/tasks', async (req, res) => {
+    try {
+      const limit = req.query.limit ? Number(req.query.limit) : 10
+      const rows = await getRecentTasks(limit)
+      res.json({ ok: true, tasks: rows, total: rows.length })
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Failed to read tasks' })
+    }
+  })
+
+  app.post('/api/tasks/:id/stop', async (req, res) => {
+    try {
+      const id = Number(req.params.id)
+      if (!Number.isFinite(id)) return res.status(400).json({ ok: false, error: 'Invalid id' })
+      await cancelTask(id)
+      res.json({ ok: true, id })
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Failed to stop task' })
+    }
+  })
+
   app.post('/api/cells/init', async (req, res) => {
     try {
       const matrix = loadMatrixFromCsv()
@@ -343,6 +402,52 @@ export function createApp() {
       res.json({ ok: true, items: rows, total: rows.length })
     } catch (e: any) {
       res.status(500).json({ ok: false, error: e?.message || 'Failed to read cell items' })
+    }
+  })
+
+  app.get('/api/cells/:rowIndex/:colIndex/collision-cost', async (req, res) => {
+    try {
+      const rowIndex = Number(req.params.rowIndex)
+      const colIndex = Number(req.params.colIndex)
+      if (!Number.isFinite(rowIndex) || !Number.isFinite(colIndex)) return res.status(400).json({ ok: false, error: 'rowIndex/colIndex required' })
+      const row = await getCollisionCostByCell(rowIndex, colIndex)
+      res.json({ ok: true, collision: row })
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Failed to read collision cost' })
+    }
+  })
+
+  app.get('/api/mapping/elements/status-summary', async (req, res) => {
+    try {
+      const axis = typeof req.query.axis === 'string' && (req.query.axis === 'row' || req.query.axis === 'col') ? (req.query.axis as 'row' | 'col') : 'row'
+      const rows = await getElementStatusSummary(axis)
+      res.json({ ok: true, statuses: rows, total: rows.length })
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Failed to read element status summary' })
+    }
+  })
+
+  app.get('/api/cells/:rowIndex/:colIndex/risk', async (req, res) => {
+    try {
+      const rowIndex = Number(req.params.rowIndex)
+      const colIndex = Number(req.params.colIndex)
+      if (!Number.isFinite(rowIndex) || !Number.isFinite(colIndex)) return res.status(400).json({ ok: false, error: 'rowIndex/colIndex required' })
+      const row = await getCellRiskByCell(rowIndex, colIndex)
+      res.json({ ok: true, risk: row })
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Failed to read cell risk' })
+    }
+  })
+
+  app.get('/api/cells/:rowIndex/:colIndex/calc-items', async (req, res) => {
+    try {
+      const rowIndex = Number(req.params.rowIndex)
+      const colIndex = Number(req.params.colIndex)
+      if (!Number.isFinite(rowIndex) || !Number.isFinite(colIndex)) return res.status(400).json({ ok: false, error: 'rowIndex/colIndex required' })
+      const payload = await getCalcItemsByCell(rowIndex, colIndex)
+      res.json({ ok: true, ...payload })
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Failed to read calc items' })
     }
   })
 

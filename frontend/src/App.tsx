@@ -43,11 +43,19 @@ function App() {
   const [llmPing, setLlmPing] = useState<{ provider?: string; content?: string } | null>(null)
   const [llmPingMsg, setLlmPingMsg] = useState<string>('test')
   const [cellSummary, setCellSummary] = useState<Array<{ row_index: number; col_index: number; min?: number; max?: number; sum?: number }>>([])
+  const [cellSummaryUnits, setCellSummaryUnits] = useState<Record<string, string>>({})
+  const [cellSummaryHazard, setCellSummaryHazard] = useState<Record<string, number>>({})
   const [cellStatuses, setCellStatuses] = useState<Array<{ row_index: number; col_index: number; status: string }>>([])
   const [cellPanel, setCellPanel] = useState<{ rowIndex: number; colIndex: number; rowLabel?: string; colLabel?: string; rowGroup?: string; colGroup?: string } | null>(null)
   const [cellWorkType, setCellWorkType] = useState<string>('')
   const [cellSug, setCellSug] = useState<Array<{ id: number; price_id: number; price_name?: string; price_unit?: string; price_category?: string; price_source?: string; price_source_page?: string; score?: number; status?: 'proposed' | 'accepted' | 'rejected'; work_type?: string }>>([])
   const [cellItems, setCellItems] = useState<Array<{ id: number; price_id: number; quantity?: number; unit_price?: number; currency?: string; total?: number; source?: string; source_page?: string; work_type?: string }>>([])
+  const [calcItems, setCalcItems] = useState<{ row: Array<{ name?: string; unit?: string; price?: number; currency?: string }>; col: Array<{ name?: string; unit?: string; price?: number; currency?: string }> } | null>(null)
+  const [tasks, setTasks] = useState<Array<{ id: number; type: string; status: string; progress: number; message?: string }>>([])
+  const [lastTask, setLastTask] = useState<{ id: number; type: string; status: string; progress: number; message?: string } | null>(null)
+  const [activeLogs, setActiveLogs] = useState<Array<{ ts: string; level: string; message?: string }>>([])
+  const [collisionInfo, setCollisionInfo] = useState<{ unit?: string; min?: number; max?: number; scenarios?: Array<{ scenario: string; rationale?: string }> } | null>(null)
+  const [elementStatuses, setElementStatuses] = useState<Record<string, { status: string }>>({})
 
   useEffect(() => {
     loadMatrixAuto()
@@ -55,11 +63,63 @@ function App() {
       .catch((e) => console.error(e))
   }, [])
 
+  useEffect(() => {
+    const tick = () => {
+      fetch('http://localhost:3001/api/tasks?limit=5')
+        .then((r) => r.json())
+        .then((j) => {
+          const arr = (j?.tasks || []) as any[]
+          setTasks(arr)
+          const latest = arr[0] || null
+          setLastTask(latest || null)
+          if (latest) {
+            fetch(`http://localhost:3001/api/tasks/${latest.id}`)
+              .then((r) => r.json())
+              .then((jj) => setLastTask(jj?.task || latest))
+              .catch(() => {})
+            fetch(`http://localhost:3001/api/tasks/${latest.id}/logs?limit=50`)
+              .then((r) => r.json())
+              .then((jj) => setActiveLogs((jj?.logs || []) as any))
+              .catch(() => {})
+          } else {
+            setActiveLogs([])
+          }
+        })
+        .catch((e) => console.error(e))
+    }
+    const h = setInterval(tick, 3000)
+    tick()
+    return () => clearInterval(h)
+  }, [])
+
+  useEffect(() => {
+    fetch('http://localhost:3001/api/mapping/elements/status-summary?axis=row')
+      .then((r) => r.json())
+      .then((j) => {
+        const map: Record<string, { status: string }> = {}
+        for (const s of (j?.statuses || []) as any[]) {
+          map[`${s.grp}|${s.element}`] = { status: s.status }
+        }
+        setElementStatuses(map)
+      })
+      .catch((e) => console.error(e))
+  }, [])
+
   const loadCellSummary = async () => {
     try {
       const r = await fetch('http://localhost:3001/api/cells/summary')
       const j = await r.json()
-      setCellSummary((j?.summary || []) as any)
+      const arr = (j?.summary || []) as any[]
+      setCellSummary(arr as any)
+      const units: Record<string, string> = {}
+      const hazards: Record<string, number> = {}
+      for (const s of arr) {
+        const key = `${s.row_index}|${s.col_index}`
+        if (typeof s.unit === 'string') units[key] = s.unit
+        if (typeof s.hazard === 'number') hazards[key] = s.hazard
+      }
+      setCellSummaryUnits(units)
+      setCellSummaryHazard(hazards)
     } catch (e) { console.error(e) }
   }
 
@@ -70,6 +130,13 @@ function App() {
       setCellStatuses(((j?.statuses || []) as any).map((s: any) => ({ row_index: s.row_index, col_index: s.col_index, status: s.status })))
     } catch (e) { console.error(e) }
   }
+
+  useEffect(() => {
+    if (tab === 'cost') {
+      loadCellSummary()
+      loadCellStatuses()
+    }
+  }, [tab])
 
   useEffect(() => {
     fetch('http://localhost:3001/api/disciplines')
@@ -260,6 +327,40 @@ function App() {
   return (
     <div className="container">
       <h1>Матрица коллизий (пример)</h1>
+      {lastTask && (
+        <div className="panel" style={{ marginBottom: 10 }}>
+          <div className="sub">Задача: {lastTask.type} · Статус: {lastTask.status} · Прогресс: {lastTask.progress}% {lastTask.message ? `· ${lastTask.message}` : ''}</div>
+          <div className="actions">
+            <button onClick={() => fetch(`http://localhost:3001/api/tasks/${lastTask.id}/logs?limit=200`).then((r) => r.json()).then((j) => setActiveLogs((j?.logs || []) as any))}>Показать логи</button>
+            {lastTask.status === 'running' && (
+              <button style={{ marginLeft: 8 }} onClick={() => fetch(`http://localhost:3001/api/tasks/${lastTask.id}/stop`, { method: 'POST' }).then(() => {}).catch((e) => console.error(e))}>отмена</button>
+            )}
+          </div>
+          {activeLogs.length > 0 && (
+            <div className="sub">Логи последней задачи</div>
+          )}
+          {activeLogs.length > 0 && (
+            <table className="sug-table">
+              <thead>
+                <tr>
+                  <th>Время</th>
+                  <th>Уровень</th>
+                  <th>Сообщение</th>
+                </tr>
+              </thead>
+              <tbody>
+                {activeLogs.map((l, i) => (
+                  <tr key={i}>
+                    <td>{l.ts}</td>
+                    <td>{l.level}</td>
+                    <td>{l.message || ''}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
       <div className="actions">
         <button onClick={() => setTab('matrix')}>Матрица</button>
         <button onClick={() => setTab('cost')}>Матрица со стоимостью</button>
@@ -278,6 +379,7 @@ function App() {
               </button>
             )}
             {saveMsg && <span className="save-msg">{saveMsg}</span>}
+            <button style={{ marginLeft: 8 }} onClick={() => fetch('http://localhost:3001/api/tasks/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'auto_approve_elements' }) }).then(() => {}).catch((e) => console.error(e))}>Авто‑одобрить стоимости (Элементы, LLM)</button>
           </div>
           <div className="matrix-wrap">
             <table className="matrix">
@@ -317,7 +419,7 @@ function App() {
                           {off === 0 && (
                             <th className="row-group" rowSpan={rseg.length}>{rseg.group}</th>
                           )}
-                          <th className="row-header">
+                          <th className="row-header" style={{ border: (() => { const st = elementStatuses[`${rseg.group}|${r.label}`]?.status; if (st === 'all_processed') return '2px solid #00b050'; if (st === 'in_progress') return '2px solid #ffd966'; return undefined })() }}>
                             <div className="label" style={{ cursor: 'pointer' }} onClick={() => setSelected({ grp: rseg.group, element: r.label })}>{r.label}</div>
                           </th>
                           {colSegments.map((cseg, csi) => (
@@ -410,6 +512,8 @@ function App() {
           <div className="actions">
             <button onClick={() => fetch('http://localhost:3001/api/cells/init', { method: 'POST' }).then(() => { loadCellSummary(); loadCellStatuses() })}>Синхронизировать ячейки</button>
             <button onClick={() => { loadCellSummary(); loadCellStatuses() }}>Обновить сводку</button>
+            <button style={{ marginLeft: 8 }} onClick={() => fetch('http://localhost:3001/api/tasks/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'compute_collisions_all' }) }).then(() => {}).catch((e) => console.error(e))}>Запустить расчёт коллизий (LLM)</button>
+            <button style={{ marginLeft: 8 }} onClick={() => fetch('http://localhost:3001/api/tasks/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'compute_risk_all' }) }).then(() => {}).catch((e) => console.error(e))}>Запустить ранжирование важности (LLM)</button>
           </div>
           <div className="matrix-wrap">
             <table className="matrix">
@@ -458,8 +562,12 @@ function App() {
                                 const ciAbs = cseg.start + ci
                                 const summary = cellSummary.find((s) => s.row_index === ri && s.col_index === ciAbs)
                                 const display = summary ? (summary.min && summary.max && summary.min !== summary.max ? `${(summary.min || 0).toFixed(2)}–${(summary.max || 0).toFixed(2)}` : (typeof summary.sum === 'number' ? summary.sum.toFixed(2) : '—')) : '—'
+                                const unit = cellSummaryUnits[`${ri}|${ciAbs}`] || ''
+                                const hz = cellSummaryHazard[`${ri}|${ciAbs}`]
+                                const bgRisk = typeof hz === 'number' ? (hz >= 0.66 ? '#ffcccc' : hz >= 0.33 ? '#ffe699' : '#fff2cc') : undefined
                                 const st = cellStatuses.find((x) => x.row_index === ri && x.col_index === ciAbs)?.status || ''
-                                const bg = st === 'all_accepted' ? '#C6EFCE' : st === 'all_rejected' ? '#F2DCDB' : undefined
+                                const bgStatus = st === 'all_accepted' ? '#C6EFCE' : st === 'all_rejected' ? '#F2DCDB' : undefined
+                                const bg = bgRisk || bgStatus
                                 return (
                                   <td
                                     key={`ccell-${ri}-${ciAbs}`}
@@ -469,8 +577,13 @@ function App() {
                                       setCellPanel({ rowIndex: ri, colIndex: ciAbs, rowLabel: r.label, rowGroup: rseg.group, colLabel: data!.columns[ciAbs].label, colGroup: data!.columns[ciAbs].group })
                                       fetch(`http://localhost:3001/api/cells/${ri}/${ciAbs}/items`).then((r) => r.json()).then((j) => setCellItems((j?.items || []) as any))
                                       fetch(`http://localhost:3001/api/cells/${ri}/${ciAbs}/suggestions?limit=20`).then((r) => r.json()).then((j) => setCellSug((j?.suggestions || []) as any))
+                                      fetch(`http://localhost:3001/api/cells/${ri}/${ciAbs}/collision-cost`).then((r) => r.json()).then((j) => {
+                                        const c = j?.collision || null
+                                        setCollisionInfo(c ? { unit: c.unit, min: c.min, max: c.max, scenarios: (() => { try { return JSON.parse(c.scenarios_json || '[]') } catch { return [] } })() } : null)
+                                      })
+                                      fetch(`http://localhost:3001/api/cells/${ri}/${ciAbs}/calc-items`).then((r) => r.json()).then((j) => setCalcItems({ row: (j?.rowItems || []) as any, col: (j?.colItems || []) as any }))
                                     }}
-                                    title={`Σ ${display}`}
+                                    title={`Σ ${display}${unit ? ` ${unit}` : ''}`}
                                   >
                                     {display}
                                   </td>
@@ -497,6 +610,68 @@ function App() {
               <div className="sug-head">
                 Расчёт: <b>{cellPanel.rowGroup} / {cellPanel.rowLabel} × {cellPanel.colGroup} / {cellPanel.colLabel}</b>
               </div>
+              {collisionInfo && (
+                <div className="panel">
+                  <div className="sub">Оценка коллизий</div>
+                  <div className="sub">Диапазон: {typeof collisionInfo.min === 'number' ? collisionInfo.min.toFixed(2) : '—'}–{typeof collisionInfo.max === 'number' ? collisionInfo.max.toFixed(2) : '—'} {collisionInfo.unit || ''}</div>
+                  {Array.isArray(collisionInfo.scenarios) && collisionInfo.scenarios.length > 0 && (
+                    <table className="sug-table">
+                      <thead>
+                        <tr>
+                          <th>Сценарий</th>
+                          <th>Обоснование</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {collisionInfo.scenarios.map((s, i) => (
+                          <tr key={i}>
+                            <td>{s.scenario}</td>
+                            <td>{s.rationale || '—'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              )}
+              {calcItems && (
+                <div className="panel">
+                  <div className="sub">Позиции, учтённые в расчёте</div>
+                  <table className="sug-table">
+                    <thead>
+                      <tr>
+                        <th>Источник</th>
+                        <th>Наименование</th>
+                        <th>Цена</th>
+                        <th>Ед.</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {calcItems.row.map((i, idx) => (
+                        <tr key={`r-${idx}`}>
+                          <td>Строка</td>
+                          <td>{i.name || '—'}</td>
+                          <td>{typeof i.price === 'number' ? `${(i.price || 0).toFixed(2)} ${i.currency || 'RUB'}` : '—'}</td>
+                          <td>{i.unit || '—'}</td>
+                        </tr>
+                      ))}
+                      {calcItems.col.map((i, idx) => (
+                        <tr key={`c-${idx}`}>
+                          <td>Колонка</td>
+                          <td>{i.name || '—'}</td>
+                          <td>{typeof i.price === 'number' ? `${(i.price || 0).toFixed(2)} ${i.currency || 'RUB'}` : '—'}</td>
+                          <td>{i.unit || '—'}</td>
+                        </tr>
+                      ))}
+                      {calcItems.row.length === 0 && calcItems.col.length === 0 && (
+                        <tr>
+                          <td colSpan={3} className="sub">Нет принятых позиций</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
               <div className="actions">
                 <button onClick={() => fetch(`http://localhost:3001/api/cells/${cellPanel.rowIndex}/${cellPanel.colIndex}/suggest`, { method: 'POST' }).then(() => fetch(`http://localhost:3001/api/cells/${cellPanel.rowIndex}/${cellPanel.colIndex}/suggestions?limit=20`).then((r) => r.json()).then((j) => setCellSug((j?.suggestions || []) as any)))}>Сгенерировать предложения (ячейка)</button>
                 <button onClick={() => fetch(`http://localhost:3001/api/cells/${cellPanel.rowIndex}/${cellPanel.colIndex}/auto-approve`, { method: 'POST' }).then(() => { fetch(`http://localhost:3001/api/cells/${cellPanel.rowIndex}/${cellPanel.colIndex}/suggestions?limit=20`).then((r) => r.json()).then((j) => setCellSug((j?.suggestions || []) as any)); fetch(`http://localhost:3001/api/cells/${cellPanel.rowIndex}/${cellPanel.colIndex}/items`).then((r) => r.json()).then((j) => setCellItems((j?.items || []) as any)); loadCellSummary(); loadCellStatuses() })} style={{ marginLeft: 8 }}>Авто‑одобрить (LLM)</button>

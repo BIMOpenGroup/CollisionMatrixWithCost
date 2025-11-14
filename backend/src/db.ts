@@ -21,7 +21,7 @@ export const db = new sqlite3.Database(dbPath)
 export function initDB(): Promise<void> {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
-      db.exec(`PRAGMA foreign_keys = ON`)
+  db.exec(`PRAGMA foreign_keys = ON`)
       db.run(
         `CREATE TABLE IF NOT EXISTS disciplines (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -162,6 +162,68 @@ export function initDB(): Promise<void> {
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY(cell_id) REFERENCES cell_keys(id) ON DELETE CASCADE,
           FOREIGN KEY(price_id) REFERENCES prices(id) ON DELETE CASCADE
+        )`,
+        (err) => {
+          if (err) return reject(err)
+        }
+      )
+
+      db.run(
+        `CREATE TABLE IF NOT EXISTS collision_costs (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          cell_id INTEGER NOT NULL UNIQUE,
+          unit TEXT,
+          min REAL,
+          max REAL,
+          scenarios_json TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY(cell_id) REFERENCES cell_keys(id) ON DELETE CASCADE
+        )`,
+        (err) => {
+          if (err) return reject(err)
+        }
+      )
+
+      db.run(
+        `CREATE TABLE IF NOT EXISTS cell_risks (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          cell_id INTEGER NOT NULL UNIQUE,
+          hazard REAL,
+          importance REAL,
+          difficulty REAL,
+          rationale_json TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY(cell_id) REFERENCES cell_keys(id) ON DELETE CASCADE
+        )`,
+        (err) => {
+          if (err) return reject(err)
+        }
+      )
+
+      db.run(
+        `CREATE TABLE IF NOT EXISTS tasks (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          type TEXT NOT NULL,
+          status TEXT NOT NULL CHECK(status IN ('queued','running','done','error')),
+          progress INTEGER DEFAULT 0,
+          message TEXT,
+          started_at DATETIME,
+          finished_at DATETIME
+        )`,
+        (err) => {
+          if (err) return reject(err)
+        }
+      )
+
+      db.run(
+        `CREATE TABLE IF NOT EXISTS task_logs (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          task_id INTEGER NOT NULL,
+          ts DATETIME DEFAULT CURRENT_TIMESTAMP,
+          level TEXT DEFAULT 'info',
+          message TEXT,
+          data TEXT,
+          FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE CASCADE
         )`,
         (err) => {
           if (err) return reject(err)
@@ -363,7 +425,7 @@ export function getMappingSuggestions(
                   LEFT JOIN prices p ON p.id = ms.price_id`
     const where = discipline ? ` WHERE discipline = ?` : ''
     db.all(
-      base + where + ` ORDER BY (score IS NULL), score DESC, created_at DESC LIMIT ?`,
+      base + where + ` ORDER BY (ms.score IS NULL), ms.score DESC, ms.created_at DESC LIMIT ?`,
       discipline ? [discipline, limit] : [limit],
       (err, rows) => {
         if (err) return reject(err)
@@ -579,6 +641,19 @@ export function getCellKeyByIndices(row_index: number, col_index: number): Promi
   })
 }
 
+export function getAllCellKeys(limit = 100000): Promise<Array<{ id: number; row_index: number; col_index: number; row_group: string; row_label: string; col_group: string; col_label: string }>> {
+  return new Promise((resolve, reject) => {
+    db.all(
+      `SELECT id, row_index, col_index, row_group, row_label, col_group, col_label FROM cell_keys ORDER BY row_index, col_index LIMIT ?`,
+      [limit],
+      (err, rows) => {
+        if (err) return reject(err)
+        resolve(rows as any)
+      }
+    )
+  })
+}
+
 export function bulkInsertCellSuggestions(rows: Array<{ cell_id: number; work_type?: string | null; price_id: number; score?: number; method?: string; status?: 'proposed' | 'accepted' | 'rejected' }>): Promise<number> {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
@@ -685,9 +760,17 @@ export function getCellItems(row_index: number, col_index: number): Promise<Arra
 export function getCellSummary(): Promise<Array<{ row_index: number; col_index: number; min?: number; max?: number; sum?: number }>> {
   return new Promise((resolve, reject) => {
     const sql = `SELECT ck.row_index, ck.col_index,
-                        MIN(ci.total) AS min, MAX(ci.total) AS max, SUM(ci.total) AS sum
+                        COALESCE(cc.min, MIN(ci.total)) AS min,
+                        COALESCE(cc.max, MAX(ci.total)) AS max,
+                        SUM(ci.total) AS sum,
+                        cc.unit AS unit,
+                        cr.hazard AS hazard,
+                        cr.importance AS importance,
+                        cr.difficulty AS difficulty
                  FROM cell_keys ck
                  LEFT JOIN cell_items ci ON ci.cell_id = ck.id
+                 LEFT JOIN collision_costs cc ON cc.cell_id = ck.id
+                 LEFT JOIN cell_risks cr ON cr.cell_id = ck.id
                  GROUP BY ck.row_index, ck.col_index`
     db.all(sql, [], (err, rows) => {
       if (err) return reject(err)
@@ -716,5 +799,183 @@ export function getCellStatusSummary(): Promise<Array<{ row_index: number; col_i
       if (err) return reject(err)
       resolve(rows as any)
     })
+  })
+}
+
+export function getElementStatusSummary(axis: 'row' | 'col' | 'all' = 'row'): Promise<Array<{ grp: string; element: string; axis: string; total: number; accepted: number; rejected: number; proposed: number; status: string }>> {
+  return new Promise((resolve, reject) => {
+    const where = axis === 'all' ? '' : ` WHERE es.axis = ?`
+    const params = axis === 'all' ? [] : [axis]
+    const sql = `SELECT es.grp AS grp, es.element AS element, es.axis AS axis,
+                        COUNT(es.id) AS total,
+                        SUM(CASE WHEN es.status = 'accepted' THEN 1 ELSE 0 END) AS accepted,
+                        SUM(CASE WHEN es.status = 'rejected' THEN 1 ELSE 0 END) AS rejected,
+                        SUM(CASE WHEN es.status = 'proposed' THEN 1 ELSE 0 END) AS proposed,
+                        CASE
+                          WHEN COUNT(es.id) = 0 THEN 'none'
+                          WHEN SUM(CASE WHEN es.status = 'proposed' THEN 1 ELSE 0 END) = 0 THEN 'all_processed'
+                          WHEN SUM(CASE WHEN es.status != 'proposed' THEN 1 ELSE 0 END) > 0 THEN 'in_progress'
+                          ELSE 'none'
+                        END AS status
+                 FROM element_suggestions es${where}
+                 GROUP BY es.grp, es.element, es.axis`
+    db.all(sql, params, (err, rows) => {
+      if (err) return reject(err)
+      resolve(rows as any)
+    })
+  })
+}
+
+export type TaskRow = { id: number; type: string; status: 'queued'|'running'|'done'|'error'; progress: number; message?: string | null; started_at?: string | null; finished_at?: string | null }
+
+export function insertTask(type: string): Promise<number> {
+  return new Promise((resolve, reject) => {
+    db.run(
+      `INSERT INTO tasks (type, status, progress) VALUES (?, 'queued', 0)`,
+      [type],
+      function (this: sqlite3.RunResult, err) {
+        if (err) return reject(err)
+        resolve(this.lastID as number)
+      }
+    )
+  })
+}
+
+export function updateTaskStatus(id: number, status: 'queued'|'running'|'done'|'error', progress?: number, message?: string | null): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const finished = status === 'done' || status === 'error'
+    db.run(
+      `UPDATE tasks SET status = ?, progress = COALESCE(?, progress), message = COALESCE(?, message), started_at = COALESCE(started_at, CASE WHEN ? = 'running' THEN CURRENT_TIMESTAMP ELSE started_at END), finished_at = CASE WHEN ? THEN CURRENT_TIMESTAMP ELSE finished_at END WHERE id = ?`,
+      [status, typeof progress === 'number' ? Math.max(0, Math.min(100, Math.floor(progress))) : null, message || null, status, finished ? 1 : 0, id],
+      (err) => {
+        if (err) return reject(err)
+        resolve()
+      }
+    )
+  })
+}
+
+export function getTaskById(id: number): Promise<TaskRow | null> {
+  return new Promise((resolve, reject) => {
+    db.get(`SELECT id, type, status, progress, message, started_at, finished_at FROM tasks WHERE id = ?`, [id], (err, row) => {
+      if (err) return reject(err)
+      resolve((row as any) || null)
+    })
+  })
+}
+
+export function getRecentTasks(limit = 10): Promise<TaskRow[]> {
+  return new Promise((resolve, reject) => {
+    db.all(`SELECT id, type, status, progress, message, started_at, finished_at FROM tasks ORDER BY COALESCE(started_at, finished_at) DESC NULLS LAST, id DESC LIMIT ?`, [limit], (err, rows) => {
+      if (err) return reject(err)
+      resolve(rows as any)
+    })
+  })
+}
+
+export function insertTaskLog(task_id: number, level: 'info'|'warn'|'error', message: string, data?: any): Promise<void> {
+  return new Promise((resolve, reject) => {
+    db.run(`INSERT INTO task_logs (task_id, level, message, data) VALUES (?, ?, ?, ?)`, [task_id, level, message, data !== undefined ? JSON.stringify(data) : null], (err) => {
+      if (err) return reject(err)
+      resolve()
+    })
+  })
+}
+
+export function getTaskLogs(task_id: number, limit = 200): Promise<Array<{ id: number; ts: string; level: string; message?: string; data?: string }>> {
+  return new Promise((resolve, reject) => {
+    db.all(`SELECT id, ts, level, message, data FROM task_logs WHERE task_id = ? ORDER BY id DESC LIMIT ?`, [task_id, limit], (err, rows) => {
+      if (err) return reject(err)
+      resolve(rows as any)
+    })
+  })
+}
+
+export function upsertCollisionCost(cell_id: number, payload: { unit?: string | null; min?: number | null; max?: number | null; scenarios_json?: string | null }): Promise<void> {
+  return new Promise((resolve, reject) => {
+    db.run(
+      `INSERT INTO collision_costs (cell_id, unit, min, max, scenarios_json)
+       VALUES (?, ?, ?, ?, ?)
+       ON CONFLICT(cell_id) DO UPDATE SET unit=excluded.unit, min=excluded.min, max=excluded.max, scenarios_json=excluded.scenarios_json, created_at=CURRENT_TIMESTAMP`,
+      [cell_id, payload.unit || null, typeof payload.min === 'number' ? payload.min : null, typeof payload.max === 'number' ? payload.max : null, payload.scenarios_json || null],
+      (err) => {
+        if (err) return reject(err)
+        resolve()
+      }
+    )
+  })
+}
+
+export function getCollisionCostByCell(row_index: number, col_index: number): Promise<{ unit?: string; min?: number; max?: number; scenarios_json?: string; created_at: string } | null> {
+  return new Promise((resolve, reject) => {
+    getCellKeyByIndices(row_index, col_index)
+      .then((cell) => {
+        if (!cell) return resolve(null)
+        db.get(`SELECT unit, min, max, scenarios_json, created_at FROM collision_costs WHERE cell_id = ?`, [cell.id], (err, row) => {
+          if (err) return reject(err)
+          resolve((row as any) || null)
+        })
+      })
+      .catch(reject)
+  })
+}
+
+export function upsertCellRisk(cell_id: number, payload: { hazard?: number | null; importance?: number | null; difficulty?: number | null; rationale_json?: string | null }): Promise<void> {
+  return new Promise((resolve, reject) => {
+    db.run(
+      `INSERT INTO cell_risks (cell_id, hazard, importance, difficulty, rationale_json)
+       VALUES (?, ?, ?, ?, ?)
+       ON CONFLICT(cell_id) DO UPDATE SET hazard=excluded.hazard, importance=excluded.importance, difficulty=excluded.difficulty, rationale_json=excluded.rationale_json, created_at=CURRENT_TIMESTAMP`,
+      [cell_id, typeof payload.hazard === 'number' ? payload.hazard : null, typeof payload.importance === 'number' ? payload.importance : null, typeof payload.difficulty === 'number' ? payload.difficulty : null, payload.rationale_json || null],
+      (err) => {
+        if (err) return reject(err)
+        resolve()
+      }
+    )
+  })
+}
+
+export function getCellRiskByCell(row_index: number, col_index: number): Promise<{ hazard?: number; importance?: number; difficulty?: number; rationale_json?: string; created_at: string } | null> {
+  return new Promise((resolve, reject) => {
+    getCellKeyByIndices(row_index, col_index)
+      .then((cell) => {
+        if (!cell) return resolve(null)
+        db.get(`SELECT hazard, importance, difficulty, rationale_json, created_at FROM cell_risks WHERE cell_id = ?`, [cell.id], (err, row) => {
+          if (err) return reject(err)
+          resolve((row as any) || null)
+        })
+      })
+      .catch(reject)
+  })
+}
+
+export function getCalcItemsByCell(row_index: number, col_index: number): Promise<{ rowItems: Array<{ price_id: number; name?: string; unit?: string; category?: string; price?: number; currency?: string }>; colItems: Array<{ price_id: number; name?: string; unit?: string; category?: string; price?: number; currency?: string }> }> {
+  return new Promise((resolve, reject) => {
+    getCellKeyByIndices(row_index, col_index)
+      .then(async (cell) => {
+        if (!cell) return resolve({ rowItems: [], colItems: [] })
+        const rowItems = await getAcceptedElementPrices(cell.row_group, cell.row_label, 'row', 50)
+        const colItems = await getAcceptedElementPrices(cell.col_group, cell.col_label, 'col', 50)
+        resolve({ rowItems, colItems })
+      })
+      .catch(reject)
+  })
+}
+
+export function getAcceptedElementPrices(grp: string, element: string, axis: 'row'|'col', limit = 50): Promise<Array<{ price_id: number; name?: string; unit?: string; category?: string; price?: number; currency?: string }>> {
+  return new Promise((resolve, reject) => {
+    db.all(
+      `SELECT es.price_id, p.name, p.unit, p.category, p.price, p.currency
+       FROM element_suggestions es
+       LEFT JOIN prices p ON p.id = es.price_id
+       WHERE es.grp = ? AND es.element = ? AND es.axis = ? AND es.status = 'accepted'
+       ORDER BY es.created_at DESC
+       LIMIT ?`,
+      [grp, element, axis, limit],
+      (err, rows) => {
+        if (err) return reject(err)
+        resolve(rows as any)
+      }
+    )
   })
 }
