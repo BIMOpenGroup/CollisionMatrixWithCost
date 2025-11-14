@@ -5,3 +5,4 @@ dist/
 data/
 tmp/locks/indexing.lock
 backend/build/
+backend/logs/llm.log
