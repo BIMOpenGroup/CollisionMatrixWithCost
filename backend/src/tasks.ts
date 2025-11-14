@@ -95,6 +95,7 @@ async function runComputeCollisionsAll(taskId: number) {
   try {
     await updateTaskStatus(taskId, 'running', 0, 'Расчёт коллизий')
     const keys = await getAllCellKeys()
+    const priceCatalog = await getPrices(10000)
     let processed = 0
     for (const k of keys) {
       if (cancelledTaskIds.has(taskId)) break
@@ -102,7 +103,55 @@ async function runComputeCollisionsAll(taskId: number) {
       const colItems = await getAcceptedElementPrices(k.col_group, k.col_label, 'col', 50)
       const estimate = await llmCollisionEstimate(`${k.row_group} / ${k.row_label} × ${k.col_group} / ${k.col_label}`, rowItems, colItems)
       if (estimate) {
-        await upsertCollisionCost(k.id, { unit: estimate.unit || null, min: typeof estimate.price_min === 'number' ? estimate.price_min : null, max: typeof estimate.price_max === 'number' ? estimate.price_max : null, scenarios_json: estimate.scenarios_json || null })
+        let min = typeof estimate.price_min === 'number' ? estimate.price_min : null
+        let max = typeof estimate.price_max === 'number' ? estimate.price_max : null
+        let scenarios_json = estimate.scenarios_json || null
+
+        try {
+          const scenarios: Array<{ scenario: string; rationale?: string; items?: Array<{ name: string }> }> = (() => { try { return JSON.parse(String(scenarios_json || '[]')) } catch { return [] } })()
+          const norm = (s: string) => s.toLowerCase().replace(/[^a-zа-я0-9\s]+/gi, ' ').replace(/\s+/g, ' ').trim()
+          const tokenize = (s: string) => norm(s).split(' ').filter((w) => w.length > 1 && !['и','в','на','из','для','по','под','шт','м','мм','м2','м3','ед','работ','работы','монтаж','демонтаж','устройство'].includes(w))
+          const score = (itemName: string, priceName: string) => {
+            const a = new Set(tokenize(itemName))
+            const b = new Set(tokenize(priceName))
+            if (a.size === 0 || b.size === 0) return 0
+            let inter = 0
+            for (const t of a) if (b.has(t)) inter++
+            return inter / Math.max(a.size, b.size)
+          }
+          const candidates = priceCatalog
+          const attachMatched = (name: string): { matched_name?: string; unit_price?: number; unit?: string; currency?: string } => {
+            let best: { name: string; unit?: string; price?: number; currency?: string } | null = null
+            let bestScore = 0
+            for (const p of candidates) {
+              const sc = score(name, p.name)
+              if (sc > bestScore && typeof p.price === 'number') { bestScore = sc; best = p }
+            }
+            if (best && bestScore >= 0.3) return { matched_name: best.name, unit_price: best.price || undefined, unit: best.unit || undefined, currency: best.currency || 'RUB' }
+            return {}
+          }
+          let totals: number[] = []
+          const withMatched = scenarios.map((sc) => {
+            const items = (sc.items || []).map((it) => {
+              const m = attachMatched(it.name)
+              const unit_price = typeof m.unit_price === 'number' ? m.unit_price : undefined
+              const quantity = 1
+              const total = unit_price ? unit_price * quantity : undefined
+              if (typeof total === 'number') totals.push(total)
+              return { name: it.name, matched_name: m.matched_name, unit: m.unit, unit_price, quantity, total, currency: m.currency || 'RUB' }
+            })
+            return { ...sc, items }
+          })
+          if (withMatched.length) {
+            const scenarioSums = withMatched.map((sc) => (sc.items || []).reduce((acc, it) => acc + (typeof it.total === 'number' ? it.total : 0), 0))
+            const sMin = Math.min(...scenarioSums.filter((x) => Number.isFinite(x)))
+            const sMax = Math.max(...scenarioSums.filter((x) => Number.isFinite(x)))
+            if (Number.isFinite(sMin) && Number.isFinite(sMax)) { min = sMin; max = sMax }
+            scenarios_json = JSON.stringify(withMatched)
+          }
+        } catch {}
+
+        await upsertCollisionCost(k.id, { unit: estimate.unit || null, min, max, scenarios_json })
       }
       processed++
       if (processed % 20 === 0) {

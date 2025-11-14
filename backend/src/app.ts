@@ -2,7 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import path from 'path'
 import fs from 'fs'
-import { insertDiscipline, getDisciplines, bulkInsertPrices, getPrices, getMappingSuggestions, getElementSuggestions, db, getMappingSuggestionById, updateMappingSuggestionStatus, getPriceById, insertSuggestionEvent, getElementSuggestionById, updateElementSuggestionStatus, getSuggestionEvents, bulkUpsertCellKeys, getCellKeyByIndices, getCellSuggestions, updateCellSuggestionStatus, insertCellItem, getCellItems, getCellSummary, getCellSuggestionById, getCellStatusSummary, getTaskById, getTaskLogs, getRecentTasks, getCollisionCostByCell, getElementStatusSummary, getCellRiskByCell, getCalcItemsByCell } from './db'
+import { insertDiscipline, getDisciplines, bulkInsertPrices, getPrices, getMappingSuggestions, getElementSuggestions, db, getMappingSuggestionById, updateMappingSuggestionStatus, getPriceById, insertSuggestionEvent, getElementSuggestionById, updateElementSuggestionStatus, getSuggestionEvents, bulkUpsertCellKeys, getCellKeyByIndices, getCellSuggestions, updateCellSuggestionStatus, insertCellItem, getCellItems, getCellSummary, getCellSuggestionById, getCellStatusSummary, getTaskById, getTaskLogs, getRecentTasks, getCollisionCostByCell, getElementStatusSummary, getCellRiskByCell, getCalcItemsByCell, upsertCollisionCost } from './db'
 import { startTask, cancelTask } from './tasks'
 import { scrapeGarantPrices } from './scrapeGarant'
 import { loadMatrixFromCsv, extractDisciplineGroups } from './matrix'
@@ -414,6 +414,57 @@ export function createApp() {
       res.json({ ok: true, collision: row })
     } catch (e: any) {
       res.status(500).json({ ok: false, error: e?.message || 'Failed to read collision cost' })
+    }
+  })
+
+  app.post('/api/cells/:rowIndex/:colIndex/collision-scenarios', async (req, res) => {
+    try {
+      const rowIndex = Number(req.params.rowIndex)
+      const colIndex = Number(req.params.colIndex)
+      const body = typeof req.body === 'object' && req.body ? req.body : {}
+      const scenarios: Array<{ scenario: string; rationale?: string; items?: Array<{ name: string }> }> = Array.isArray(body.scenarios) ? body.scenarios : []
+      if (!Number.isFinite(rowIndex) || !Number.isFinite(colIndex)) return res.status(400).json({ ok: false, error: 'rowIndex/colIndex required' })
+      const key = await getCellKeyByIndices(rowIndex, colIndex)
+      if (!key) return res.status(404).json({ ok: false, error: 'Cell not found' })
+      const prices = await getPrices(10000)
+      const norm = (s: string) => s.toLowerCase().replace(/[^a-zа-я0-9\s]+/gi, ' ').replace(/\s+/g, ' ').trim()
+      const tokenize = (s: string) => norm(s).split(' ').filter((w) => w.length > 1 && !['и','в','на','из','для','по','под','шт','м','мм','м2','м3','ед','работ','работы','монтаж','демонтаж','устройство'].includes(w))
+      const score = (itemName: string, priceName: string) => {
+        const a = new Set(tokenize(itemName))
+        const b = new Set(tokenize(priceName))
+        if (a.size === 0 || b.size === 0) return 0
+        let inter = 0
+        for (const t of a) if (b.has(t)) inter++
+        return inter / Math.max(a.size, b.size)
+      }
+      const attachMatched = (name: string): { matched_name?: string; unit_price?: number; unit?: string; currency?: string } => {
+        let best: { name: string; unit?: string; price?: number; currency?: string } | null = null
+        let bestScore = 0
+        for (const p of prices) {
+          const sc = score(name, p.name)
+          if (sc > bestScore && typeof p.price === 'number') { bestScore = sc; best = p }
+        }
+        if (best && bestScore >= 0.3) return { matched_name: best.name, unit_price: best.price || undefined, unit: best.unit || undefined, currency: best.currency || 'RUB' }
+        return {}
+      }
+      const withMatched = scenarios.map((sc) => {
+        const items = (sc.items || []).map((it) => {
+          const m = attachMatched(it.name)
+          const unit_price = typeof m.unit_price === 'number' ? m.unit_price : undefined
+          const quantity = 1
+          const total = unit_price ? unit_price * quantity : undefined
+          return { name: it.name, matched_name: m.matched_name, unit: m.unit, unit_price, quantity, total, currency: m.currency || 'RUB' }
+        })
+        return { ...sc, items }
+      })
+      const scenarioSums = withMatched.map((sc) => (sc.items || []).reduce((acc, it) => acc + (typeof it.total === 'number' ? it.total : 0), 0))
+      const sMin = Math.min(...scenarioSums.filter((x) => Number.isFinite(x)))
+      const sMax = Math.max(...scenarioSums.filter((x) => Number.isFinite(x)))
+      const unit = body.unit && typeof body.unit === 'string' ? body.unit : null
+      await upsertCollisionCost(key.id, { unit: unit || null, min: Number.isFinite(sMin) ? sMin : null, max: Number.isFinite(sMax) ? sMax : null, scenarios_json: JSON.stringify(withMatched) })
+      res.json({ ok: true, min: Number.isFinite(sMin) ? sMin : null, max: Number.isFinite(sMax) ? sMax : null })
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Failed to update scenarios' })
     }
   })
 

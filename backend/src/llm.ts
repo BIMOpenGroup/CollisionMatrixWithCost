@@ -291,8 +291,9 @@ export async function llmCollisionEstimate(
 ): Promise<{ unit?: string; price_min?: number; price_max?: number; scenarios_json?: string } | null> {
   const cfg = getLLMConfig()
   if (!cfg) return null
-  const system = `Ты помощник-сметчик. На входе ячейка матрицы, принятые цены по элементу строки и по элементу колонки.
-Задача: оценить возможные сценарии коллизии и диапазон стоимости. Верни JSON объект вида {unit:'м/м²/м³', price_min:number, price_max:number, scenarios:[{scenario:string, rationale:string}]}.`
+  const system = `Ты помощник-сметчик. На входе столкновение двух элементов матрицы и принятые цены по элементу строки и колонки.
+Требуется: сгенерировать 3–5 реалистичных сценариев устранения коллизии на стройплощадке (например: алмазная резка монолитного ЖБ, обход трассы с дополнительными п.м., перенос и восстановление отделки/изоляции и т.п.).
+Для каждого сценария перечисли типовые работы (items) — короткие названия, как в прайсе, без фантазийных единиц измерения. НЕ указывай цены. Верни JSON: {unit:'м/м²/м³', price_min:number, price_max:number, scenarios:[{scenario:string, rationale:string, items:[{name:string}]}]}. Диапазон price_min/price_max оставь оценочным, мы пересчитаем сами.`
   const user = `Ячейка: ${context}
 Строка: ${rowItems.map((i) => `${i.name}${i.unit ? ` (${i.unit})` : ''}${typeof i.price === 'number' ? `; price=${i.price}` : ''}`).join('; ')}
 Колонка: ${colItems.map((i) => `${i.name}${i.unit ? ` (${i.unit})` : ''}${typeof i.price === 'number' ? `; price=${i.price}` : ''}`).join('; ')}`

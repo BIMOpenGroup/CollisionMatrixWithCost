@@ -54,7 +54,9 @@ function App() {
   const [tasks, setTasks] = useState<Array<{ id: number; type: string; status: string; progress: number; message?: string }>>([])
   const [lastTask, setLastTask] = useState<{ id: number; type: string; status: string; progress: number; message?: string } | null>(null)
   const [activeLogs, setActiveLogs] = useState<Array<{ ts: string; level: string; message?: string }>>([])
-  const [collisionInfo, setCollisionInfo] = useState<{ unit?: string; min?: number; max?: number; scenarios?: Array<{ scenario: string; rationale?: string }> } | null>(null)
+  const [collisionInfo, setCollisionInfo] = useState<{ unit?: string; min?: number; max?: number; scenarios?: Array<{ scenario: string; rationale?: string; items?: Array<{ name: string; matched_name?: string; unit_price?: number; quantity?: number; total?: number; currency?: string }> }> } | null>(null)
+  const [scenariosEdit, setScenariosEdit] = useState<string>('')
+  const [editMode, setEditMode] = useState<boolean>(false)
   const [elementStatuses, setElementStatuses] = useState<Record<string, { status: string }>>({})
 
   useEffect(() => {
@@ -331,9 +333,9 @@ function App() {
         <div className="panel" style={{ marginBottom: 10 }}>
           <div className="sub">Задача: {lastTask.type} · Статус: {lastTask.status} · Прогресс: {lastTask.progress}% {lastTask.message ? `· ${lastTask.message}` : ''}</div>
           <div className="actions">
-            <button onClick={() => fetch(`http://localhost:3001/api/tasks/${lastTask.id}/logs?limit=200`).then((r) => r.json()).then((j) => setActiveLogs((j?.logs || []) as any))}>Показать логи</button>
+            <button title="Показать логи последней задачи" onClick={() => fetch(`http://localhost:3001/api/tasks/${lastTask.id}/logs?limit=200`).then((r) => r.json()).then((j) => setActiveLogs((j?.logs || []) as any))}>Показать логи</button>
             {lastTask.status === 'running' && (
-              <button style={{ marginLeft: 8 }} onClick={() => fetch(`http://localhost:3001/api/tasks/${lastTask.id}/stop`, { method: 'POST' }).then(() => {}).catch((e) => console.error(e))}>отмена</button>
+              <button title="Остановить текущую задачу" style={{ marginLeft: 8 }} onClick={() => fetch(`http://localhost:3001/api/tasks/${lastTask.id}/stop`, { method: 'POST' }).then(() => {}).catch((e) => console.error(e))}>отмена</button>
             )}
           </div>
           {activeLogs.length > 0 && (
@@ -362,24 +364,24 @@ function App() {
         </div>
       )}
       <div className="actions">
-        <button onClick={() => setTab('matrix')}>Матрица</button>
-        <button onClick={() => setTab('cost')}>Матрица со стоимостью</button>
-        <button onClick={() => setTab('elements')}>Элементы</button>
-        <button onClick={() => setTab('disciplines')}>Дисциплины</button>
-        <button onClick={() => { setTab('llm'); loadProviders() }}>LLM</button>
-        <button onClick={() => { setTab('events'); loadEvents() }}>Журнал</button>
+        <button title="Просмотр исходной матрицы" onClick={() => setTab('matrix')}>Матрица</button>
+        <button title="Матрица с диапазоном стоимости" onClick={() => setTab('cost')}>Матрица со стоимостью</button>
+        <button title="Ранжирование прайса по элементам" onClick={() => setTab('elements')}>Элементы</button>
+        <button title="Ранжирование прайса по дисциплинам" onClick={() => setTab('disciplines')}>Дисциплины</button>
+        <button title="Провайдеры и пинг LLM" onClick={() => { setTab('llm'); loadProviders() }}>LLM</button>
+        <button title="Журнал событий приёмки/отказа" onClick={() => { setTab('events'); loadEvents() }}>Журнал</button>
       </div>
       {data && tab === 'matrix' ? (
         <>
           <div className="meta">Источник: {data.source}</div>
           <div className="actions">
             {data.source.startsWith('api') && (
-              <button disabled={saving} onClick={onSaveDisciplines}>
+              <button title="Сохранить группы (строки/колонки) из CSV" disabled={saving} onClick={onSaveDisciplines}>
                 {saving ? 'Сохранение…' : 'Сохранить дисциплины'}
               </button>
             )}
             {saveMsg && <span className="save-msg">{saveMsg}</span>}
-            <button style={{ marginLeft: 8 }} onClick={() => fetch('http://localhost:3001/api/tasks/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'auto_approve_elements' }) }).then(() => {}).catch((e) => console.error(e))}>Авто‑одобрить стоимости (Элементы, LLM)</button>
+            <button title="LLM принимает/отклоняет цены по элементам" style={{ marginLeft: 8 }} onClick={() => fetch('http://localhost:3001/api/tasks/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'auto_approve_elements' }) }).then(() => {}).catch((e) => console.error(e))}>Авто‑одобрить стоимости (Элементы, LLM)</button>
           </div>
           <div className="matrix-wrap">
             <table className="matrix">
@@ -488,10 +490,10 @@ function App() {
                       </td>
                       <td>
                         {s.status !== 'accepted' && (
-                          <button onClick={() => onSuggestionStatus(s.id, 'accepted')}>Принять</button>
+                          <button title="Принять предложение для элемента" onClick={() => onSuggestionStatus(s.id, 'accepted')}>Принять</button>
                         )}
                         {s.status !== 'rejected' && (
-                          <button onClick={() => onSuggestionStatus(s.id, 'rejected')} style={{ marginLeft: 8 }}>Отклонить</button>
+                          <button title="Отклонить предложение для элемента" onClick={() => onSuggestionStatus(s.id, 'rejected')} style={{ marginLeft: 8 }}>Отклонить</button>
                         )}
                       </td>
                     </tr>
@@ -510,10 +512,10 @@ function App() {
       {data && tab === 'cost' && (
         <>
           <div className="actions">
-            <button onClick={() => fetch('http://localhost:3001/api/cells/init', { method: 'POST' }).then(() => { loadCellSummary(); loadCellStatuses() })}>Синхронизировать ячейки</button>
-            <button onClick={() => { loadCellSummary(); loadCellStatuses() }}>Обновить сводку</button>
-            <button style={{ marginLeft: 8 }} onClick={() => fetch('http://localhost:3001/api/tasks/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'compute_collisions_all' }) }).then(() => {}).catch((e) => console.error(e))}>Запустить расчёт коллизий (LLM)</button>
-            <button style={{ marginLeft: 8 }} onClick={() => fetch('http://localhost:3001/api/tasks/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'compute_risk_all' }) }).then(() => {}).catch((e) => console.error(e))}>Запустить ранжирование важности (LLM)</button>
+            <button title="Создать/обновить ключи ячеек" onClick={() => fetch('http://localhost:3001/api/cells/init', { method: 'POST' }).then(() => { loadCellSummary(); loadCellStatuses() })}>Синхронизировать ячейки</button>
+            <button title="Обновить сводные min–max и Σ" onClick={() => { loadCellSummary(); loadCellStatuses() }}>Обновить сводку</button>
+            <button title="LLM генерирует сценарии, сервер считает диапазон" style={{ marginLeft: 8 }} onClick={() => fetch('http://localhost:3001/api/tasks/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'compute_collisions_all' }) }).then(() => {}).catch((e) => console.error(e))}>Запустить расчёт коллизий (LLM)</button>
+            <button title="LLM оценивает важность/опасность/сложность" style={{ marginLeft: 8 }} onClick={() => fetch('http://localhost:3001/api/tasks/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'compute_risk_all' }) }).then(() => {}).catch((e) => console.error(e))}>Запустить ранжирование важности (LLM)</button>
           </div>
           <div className="matrix-wrap">
             <table className="matrix">
@@ -579,7 +581,10 @@ function App() {
                                       fetch(`http://localhost:3001/api/cells/${ri}/${ciAbs}/suggestions?limit=20`).then((r) => r.json()).then((j) => setCellSug((j?.suggestions || []) as any))
                                       fetch(`http://localhost:3001/api/cells/${ri}/${ciAbs}/collision-cost`).then((r) => r.json()).then((j) => {
                                         const c = j?.collision || null
-                                        setCollisionInfo(c ? { unit: c.unit, min: c.min, max: c.max, scenarios: (() => { try { return JSON.parse(c.scenarios_json || '[]') } catch { return [] } })() } : null)
+                                        const sc = (() => { try { return JSON.parse(c?.scenarios_json || '[]') } catch { return [] } })()
+                                        setCollisionInfo(c ? { unit: c.unit, min: c.min, max: c.max, scenarios: sc } : null)
+                                        setScenariosEdit(JSON.stringify(sc, null, 2))
+                                        setEditMode(false)
                                       })
                                       fetch(`http://localhost:3001/api/cells/${ri}/${ciAbs}/calc-items`).then((r) => r.json()).then((j) => setCalcItems({ row: (j?.rowItems || []) as any, col: (j?.colItems || []) as any }))
                                     }}
@@ -614,6 +619,25 @@ function App() {
                 <div className="panel">
                   <div className="sub">Оценка коллизий</div>
                   <div className="sub">Диапазон: {typeof collisionInfo.min === 'number' ? collisionInfo.min.toFixed(2) : '—'}–{typeof collisionInfo.max === 'number' ? collisionInfo.max.toFixed(2) : '—'} {collisionInfo.unit || ''}</div>
+                  <div className="actions">
+                    <button title="Открыть/закрыть редактор JSON сценариев" onClick={() => setEditMode((v) => !v)}>{editMode ? 'Закрыть редактор' : 'Редактировать сценарии'}</button>
+                    {editMode && (
+                      <button title="Сохранить JSON, сопоставить работы с прайсом и пересчитать min–max" style={{ marginLeft: 8 }} onClick={() => {
+                        try {
+                          const parsed = JSON.parse(scenariosEdit)
+                          fetch(`http://localhost:3001/api/cells/${cellPanel!.rowIndex}/${cellPanel!.colIndex}/collision-scenarios`, {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ unit: collisionInfo.unit || null, scenarios: parsed }),
+                          }).then(() => fetch(`http://localhost:3001/api/cells/${cellPanel!.rowIndex}/${cellPanel!.colIndex}/collision-cost`).then((r) => r.json()).then((j) => {
+                            const c = j?.collision || null
+                            const sc = (() => { try { return JSON.parse(c?.scenarios_json || '[]') } catch { return [] } })()
+                            setCollisionInfo(c ? { unit: c.unit, min: c.min, max: c.max, scenarios: sc } : null)
+                            setScenariosEdit(JSON.stringify(sc, null, 2))
+                            setEditMode(false)
+                          }))
+                        } catch {}
+                      }}>Сохранить</button>
+                    )}
+                  </div>
                   {Array.isArray(collisionInfo.scenarios) && collisionInfo.scenarios.length > 0 && (
                     <table className="sug-table">
                       <thead>
@@ -631,6 +655,40 @@ function App() {
                         ))}
                       </tbody>
                     </table>
+                  )}
+                  {Array.isArray(collisionInfo.scenarios) && collisionInfo.scenarios.some((s) => Array.isArray(s.items) && s.items.length > 0) && (
+                    <table className="sug-table" style={{ marginTop: 8 }}>
+                      <thead>
+                        <tr>
+                          <th>Сценарий</th>
+                          <th>Работа</th>
+                          <th>Соответствие</th>
+                          <th>Ед.</th>
+                          <th>Ед. цена</th>
+                          <th>Кол-во</th>
+                          <th>Итого</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {collisionInfo.scenarios.flatMap((s, si) => (s.items || []).map((it, ii) => (
+                          <tr key={`${si}-${ii}`}>
+                            <td>{s.scenario}</td>
+                            <td>{it.name}</td>
+                            <td>{it.matched_name || '—'}</td>
+                            <td>{it.unit || '—'}</td>
+                            <td>{typeof it.unit_price === 'number' ? it.unit_price.toFixed(2) : '—'}</td>
+                            <td>{typeof it.quantity === 'number' ? it.quantity : '—'}</td>
+                            <td>{typeof it.total === 'number' ? it.total.toFixed(2) : '—'}</td>
+                          </tr>
+                        )))}
+                      </tbody>
+                    </table>
+                  )}
+                  {editMode && (
+                    <div className="panel" style={{ marginTop: 8 }}>
+                      <div className="sub">JSON сценариев</div>
+                      <textarea value={scenariosEdit} onChange={(e) => setScenariosEdit(e.target.value)} style={{ width: '100%', height: 200 }} />
+                    </div>
                   )}
                 </div>
               )}
@@ -673,8 +731,8 @@ function App() {
                 </div>
               )}
               <div className="actions">
-                <button onClick={() => fetch(`http://localhost:3001/api/cells/${cellPanel.rowIndex}/${cellPanel.colIndex}/suggest`, { method: 'POST' }).then(() => fetch(`http://localhost:3001/api/cells/${cellPanel.rowIndex}/${cellPanel.colIndex}/suggestions?limit=20`).then((r) => r.json()).then((j) => setCellSug((j?.suggestions || []) as any)))}>Сгенерировать предложения (ячейка)</button>
-                <button onClick={() => fetch(`http://localhost:3001/api/cells/${cellPanel.rowIndex}/${cellPanel.colIndex}/auto-approve`, { method: 'POST' }).then(() => { fetch(`http://localhost:3001/api/cells/${cellPanel.rowIndex}/${cellPanel.colIndex}/suggestions?limit=20`).then((r) => r.json()).then((j) => setCellSug((j?.suggestions || []) as any)); fetch(`http://localhost:3001/api/cells/${cellPanel.rowIndex}/${cellPanel.colIndex}/items`).then((r) => r.json()).then((j) => setCellItems((j?.items || []) as any)); loadCellSummary(); loadCellStatuses() })} style={{ marginLeft: 8 }}>Авто‑одобрить (LLM)</button>
+                <button title="Сгенерировать релевантные цены для этой ячейки" onClick={() => fetch(`http://localhost:3001/api/cells/${cellPanel.rowIndex}/${cellPanel.colIndex}/suggest`, { method: 'POST' }).then(() => fetch(`http://localhost:3001/api/cells/${cellPanel.rowIndex}/${cellPanel.colIndex}/suggestions?limit=20`).then((r) => r.json()).then((j) => setCellSug((j?.suggestions || []) as any)))}>Сгенерировать предложения (ячейка)</button>
+                <button title="LLM примет/отклонит и добавит принятые в расчёт" onClick={() => fetch(`http://localhost:3001/api/cells/${cellPanel.rowIndex}/${cellPanel.colIndex}/auto-approve`, { method: 'POST' }).then(() => { fetch(`http://localhost:3001/api/cells/${cellPanel.rowIndex}/${cellPanel.colIndex}/suggestions?limit=20`).then((r) => r.json()).then((j) => setCellSug((j?.suggestions || []) as any)); fetch(`http://localhost:3001/api/cells/${cellPanel.rowIndex}/${cellPanel.colIndex}/items`).then((r) => r.json()).then((j) => setCellItems((j?.items || []) as any)); loadCellSummary(); loadCellStatuses() })} style={{ marginLeft: 8 }}>Авто‑одобрить (LLM)</button>
                 <select value={cellWorkType} onChange={(e) => { const v = e.target.value; setCellWorkType(v); fetch(`http://localhost:3001/api/cells/${cellPanel.rowIndex}/${cellPanel.colIndex}/suggestions?work_type=${encodeURIComponent(v)}&limit=20`).then((r) => r.json()).then((j) => setCellSug((j?.suggestions || []) as any)) }}>
                   <option value="">Все виды работ</option>
                   {Array.from(new Set(cellSug.map((s) => s.work_type).filter(Boolean))).map((wt, i) => (
@@ -769,7 +827,7 @@ function App() {
       {tab === 'elements' && (
         <div className="panel">
           <div className="actions">
-            <button onClick={onGenerateElementSuggestions}>Сгенерировать предложения (элементы)</button>
+            <button title="Сгенерировать предложения цен по всем элементам" onClick={onGenerateElementSuggestions}>Сгенерировать предложения (элементы)</button>
             <span className="save-msg">{genMsg}</span>
           </div>
           <div className="sub">Выберите строку в матрице, чтобы загрузить ранжирование прайса по элементу</div>
@@ -778,7 +836,7 @@ function App() {
       {tab === 'disciplines' && (
         <div className="panel">
           <div className="actions">
-            <button onClick={onGenerateDisciplineSuggestions}>Сгенерировать предложения (дисциплины)</button>
+            <button title="Сгенерировать предложения цен по дисциплинам" onClick={onGenerateDisciplineSuggestions}>Сгенерировать предложения (дисциплины)</button>
             <span className="save-msg">{genMsg}</span>
           </div>
           <div className="actions">
@@ -820,10 +878,10 @@ function App() {
                   </td>
                   <td>
                     {s.status !== 'accepted' && (
-                      <button onClick={() => onDiscSuggestionStatus(s.id, 'accepted')}>Принять</button>
+                      <button title="Принять предложение по дисциплине" onClick={() => onDiscSuggestionStatus(s.id, 'accepted')}>Принять</button>
                     )}
                     {s.status !== 'rejected' && (
-                      <button onClick={() => onDiscSuggestionStatus(s.id, 'rejected')} style={{ marginLeft: 8 }}>Отклонить</button>
+                      <button title="Отклонить предложение по дисциплине" onClick={() => onDiscSuggestionStatus(s.id, 'rejected')} style={{ marginLeft: 8 }}>Отклонить</button>
                     )}
                   </td>
                 </tr>
@@ -862,7 +920,7 @@ function App() {
           </table>
           <div className="actions">
             <input value={llmPingMsg} onChange={(e) => setLlmPingMsg(e.target.value)} />
-            <button onClick={pingLLM}>Пинг</button>
+            <button title="Проверить доступность LLM" onClick={pingLLM}>Пинг</button>
             {llmPing && <span className="save-msg">{llmPing.provider}: {llmPing.content || ''}</span>}
           </div>
         </div>
@@ -870,7 +928,7 @@ function App() {
       {tab === 'events' && (
         <div className="panel">
           <div className="actions">
-            <button onClick={loadEvents}>Обновить</button>
+            <button title="Обновить список событий" onClick={loadEvents}>Обновить</button>
           </div>
           <table className="sug-table">
             <thead>
