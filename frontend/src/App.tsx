@@ -51,12 +51,14 @@ function App() {
   const [cellSug, setCellSug] = useState<Array<{ id: number; price_id: number; price_name?: string; price_unit?: string; price_category?: string; price_source?: string; price_source_page?: string; score?: number; status?: 'proposed' | 'accepted' | 'rejected'; work_type?: string }>>([])
   const [cellItems, setCellItems] = useState<Array<{ id: number; price_id: number; quantity?: number; unit_price?: number; currency?: string; total?: number; source?: string; source_page?: string; work_type?: string }>>([])
   const [calcItems, setCalcItems] = useState<{ row: Array<{ name?: string; unit?: string; price?: number; currency?: string }>; col: Array<{ name?: string; unit?: string; price?: number; currency?: string }> } | null>(null)
-  const [tasks, setTasks] = useState<Array<{ id: number; type: string; status: string; progress: number; message?: string }>>([])
+  const [, setTasks] = useState<Array<{ id: number; type: string; status: string; progress: number; message?: string }>>([])
   const [lastTask, setLastTask] = useState<{ id: number; type: string; status: string; progress: number; message?: string } | null>(null)
   const [activeLogs, setActiveLogs] = useState<Array<{ ts: string; level: string; message?: string }>>([])
-  const [collisionInfo, setCollisionInfo] = useState<{ unit?: string; min?: number; max?: number; scenarios?: Array<{ scenario: string; rationale?: string; items?: Array<{ name: string; matched_name?: string; unit_price?: number; quantity?: number; total?: number; currency?: string }> }> } | null>(null)
-  const [scenariosEdit, setScenariosEdit] = useState<string>('')
+  const [collisionInfo, setCollisionInfo] = useState<{ unit?: string; min?: number; max?: number; scenarios?: Array<{ scenario: string; rationale?: string; items?: Array<{ price_id?: number; name: string; matched_name?: string; unit?: string; unit_price?: number; quantity?: number; total?: number; currency?: string }> }> } | null>(null)
+  const [, setScenariosEdit] = useState<string>('')
   const [editMode, setEditMode] = useState<boolean>(false)
+  const [scenariosUi, setScenariosUi] = useState<Array<{ scenario: string; rationale?: string; items: Array<{ price_id?: number; name: string; quantity: number }> }>>([])
+  const [addSel, setAddSel] = useState<Record<number, string>>({})
   const [elementStatuses, setElementStatuses] = useState<Record<string, { status: string }>>({})
 
   useEffect(() => {
@@ -584,6 +586,7 @@ function App() {
                                         const sc = (() => { try { return JSON.parse(c?.scenarios_json || '[]') } catch { return [] } })()
                                         setCollisionInfo(c ? { unit: c.unit, min: c.min, max: c.max, scenarios: sc } : null)
                                         setScenariosEdit(JSON.stringify(sc, null, 2))
+                                        setScenariosUi((Array.isArray(sc) ? sc : []).map((s: any) => ({ scenario: String(s?.scenario || ''), rationale: typeof s?.rationale === 'string' ? s.rationale : undefined, items: Array.isArray(s?.items) ? s.items.map((it: any) => ({ price_id: typeof it?.price_id === 'number' ? it.price_id : undefined, name: String(it?.name || it?.matched_name || ''), quantity: typeof it?.quantity === 'number' ? it.quantity : 1 })) : [] })))
                                         setEditMode(false)
                                       })
                                       fetch(`http://localhost:3001/api/cells/${ri}/${ciAbs}/calc-items`).then((r) => r.json()).then((j) => setCalcItems({ row: (j?.rowItems || []) as any, col: (j?.colItems || []) as any }))
@@ -620,21 +623,20 @@ function App() {
                   <div className="sub">Оценка коллизий</div>
                   <div className="sub">Диапазон: {typeof collisionInfo.min === 'number' ? collisionInfo.min.toFixed(2) : '—'}–{typeof collisionInfo.max === 'number' ? collisionInfo.max.toFixed(2) : '—'} {collisionInfo.unit || ''}</div>
                   <div className="actions">
-                    <button title="Открыть/закрыть редактор JSON сценариев" onClick={() => setEditMode((v) => !v)}>{editMode ? 'Закрыть редактор' : 'Редактировать сценарии'}</button>
+                    <button title="Открыть/закрыть редактор сценариев" onClick={() => setEditMode((v) => !v)}>{editMode ? 'Закрыть редактор' : 'Редактировать сценарии'}</button>
                     {editMode && (
-                      <button title="Сохранить JSON, сопоставить работы с прайсом и пересчитать min–max" style={{ marginLeft: 8 }} onClick={() => {
-                        try {
-                          const parsed = JSON.parse(scenariosEdit)
-                          fetch(`http://localhost:3001/api/cells/${cellPanel!.rowIndex}/${cellPanel!.colIndex}/collision-scenarios`, {
-                            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ unit: collisionInfo.unit || null, scenarios: parsed }),
-                          }).then(() => fetch(`http://localhost:3001/api/cells/${cellPanel!.rowIndex}/${cellPanel!.colIndex}/collision-cost`).then((r) => r.json()).then((j) => {
-                            const c = j?.collision || null
-                            const sc = (() => { try { return JSON.parse(c?.scenarios_json || '[]') } catch { return [] } })()
-                            setCollisionInfo(c ? { unit: c.unit, min: c.min, max: c.max, scenarios: sc } : null)
-                            setScenariosEdit(JSON.stringify(sc, null, 2))
-                            setEditMode(false)
-                          }))
-                        } catch {}
+                      <button title="Сохранить сценарии и пересчитать min–max" style={{ marginLeft: 8 }} onClick={() => {
+                        const toSave = scenariosUi.map((s) => ({ scenario: s.scenario, rationale: s.rationale || undefined, items: s.items.map((it) => ({ price_id: it.price_id, name: it.name, quantity: it.quantity })) }))
+                        fetch(`http://localhost:3001/api/cells/${cellPanel!.rowIndex}/${cellPanel!.colIndex}/collision-scenarios`, {
+                          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ unit: collisionInfo?.unit || null, scenarios: toSave }),
+                        }).then(() => fetch(`http://localhost:3001/api/cells/${cellPanel!.rowIndex}/${cellPanel!.colIndex}/collision-cost`).then((r) => r.json()).then((j) => {
+                          const c = j?.collision || null
+                          const sc = (() => { try { return JSON.parse(c?.scenarios_json || '[]') } catch { return [] } })()
+                          setCollisionInfo(c ? { unit: c.unit, min: c.min, max: c.max, scenarios: sc } : null)
+                          setScenariosEdit(JSON.stringify(sc, null, 2))
+                          setScenariosUi((Array.isArray(sc) ? sc : []).map((s: any) => ({ scenario: String(s?.scenario || ''), rationale: typeof s?.rationale === 'string' ? s.rationale : undefined, items: Array.isArray(s?.items) ? s.items.map((it: any) => ({ price_id: typeof it?.price_id === 'number' ? it.price_id : undefined, name: String(it?.name || it?.matched_name || ''), quantity: typeof it?.quantity === 'number' ? it.quantity : 1 })) : [] })))
+                          setEditMode(false)
+                        }))
                       }}>Сохранить</button>
                     )}
                   </div>
@@ -686,8 +688,60 @@ function App() {
                   )}
                   {editMode && (
                     <div className="panel" style={{ marginTop: 8 }}>
-                      <div className="sub">JSON сценариев</div>
-                      <textarea value={scenariosEdit} onChange={(e) => setScenariosEdit(e.target.value)} style={{ width: '100%', height: 200 }} />
+                      <div className="sub">Сценарии</div>
+                      <div className="actions" style={{ marginBottom: 8 }}>
+                        <button onClick={() => setScenariosUi((prev) => [...prev, { scenario: `Сценарий ${prev.length + 1}`, rationale: '', items: [] }])}>Добавить сценарий</button>
+                      </div>
+                      {scenariosUi.map((sc, si) => (
+                        <div key={`sc-${si}`} className="panel" style={{ marginTop: 8 }}>
+                          <div className="actions">
+                            <input value={sc.scenario} onChange={(e) => setScenariosUi((prev) => prev.map((x, idx) => idx === si ? { ...x, scenario: e.target.value } : x))} style={{ width: '40%' }} />
+                            <input value={sc.rationale || ''} onChange={(e) => setScenariosUi((prev) => prev.map((x, idx) => idx === si ? { ...x, rationale: e.target.value } : x))} style={{ width: '50%', marginLeft: 8 }} />
+                            <button style={{ marginLeft: 8 }} onClick={() => setScenariosUi((prev) => prev.filter((_, idx) => idx !== si))}>Удалить</button>
+                          </div>
+                          <div className="actions" style={{ marginTop: 8 }}>
+                            <select value={addSel[si] || ''} onChange={(e) => setAddSel((prev) => ({ ...prev, [si]: e.target.value }))}>
+                              <option value="">Выберите работу</option>
+                              {cellSug.map((s) => (
+                                <option key={`opt-${si}-${s.id}`} value={String(s.price_id)}>{s.price_name || ''}</option>
+                              ))}
+                            </select>
+                            <button style={{ marginLeft: 8 }} onClick={() => {
+                              const val = addSel[si]
+                              const opt = cellSug.find((s) => String(s.price_id) === val)
+                              if (!opt) return
+                              setScenariosUi((prev) => prev.map((x, idx) => idx === si ? { ...x, items: [...x.items, { price_id: opt.price_id, name: opt.price_name || '', quantity: 1 }] } : x))
+                            }}>+ Работа</button>
+                          </div>
+                          <table className="sug-table" style={{ marginTop: 8 }}>
+                            <thead>
+                              <tr>
+                                <th>Работа</th>
+                                <th>Кол-во</th>
+                                <th>Удалить</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {sc.items.map((it, ii) => (
+                                <tr key={`it-${si}-${ii}`}>
+                                  <td>{it.name}</td>
+                                  <td>
+                                    <input type="number" step="0.01" value={typeof it.quantity === 'number' ? it.quantity : 1} onChange={(e) => setScenariosUi((prev) => prev.map((x, idx) => idx === si ? { ...x, items: x.items.map((y, jj) => jj === ii ? { ...y, quantity: e.target.value === '' ? 1 : Number(e.target.value) } : y) } : x))} />
+                                  </td>
+                                  <td>
+                                    <button onClick={() => setScenariosUi((prev) => prev.map((x, idx) => idx === si ? { ...x, items: x.items.filter((_, jj) => jj !== ii) } : x))}>Удалить</button>
+                                  </td>
+                                </tr>
+                              ))}
+                              {sc.items.length === 0 && (
+                                <tr>
+                                  <td colSpan={3} className="sub">Нет работ</td>
+                                </tr>
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>

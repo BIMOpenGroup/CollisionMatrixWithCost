@@ -422,7 +422,7 @@ export function createApp() {
       const rowIndex = Number(req.params.rowIndex)
       const colIndex = Number(req.params.colIndex)
       const body = typeof req.body === 'object' && req.body ? req.body : {}
-      const scenarios: Array<{ scenario: string; rationale?: string; items?: Array<{ name: string }> }> = Array.isArray(body.scenarios) ? body.scenarios : []
+      const scenarios: Array<{ scenario: string; rationale?: string; measures?: Record<string, number>; items?: Array<{ name?: string; price_id?: number; quantity?: number }> }> = Array.isArray(body.scenarios) ? body.scenarios : []
       if (!Number.isFinite(rowIndex) || !Number.isFinite(colIndex)) return res.status(400).json({ ok: false, error: 'rowIndex/colIndex required' })
       const key = await getCellKeyByIndices(rowIndex, colIndex)
       if (!key) return res.status(404).json({ ok: false, error: 'Cell not found' })
@@ -447,17 +447,51 @@ export function createApp() {
         if (best && bestScore >= 0.3) return { matched_name: best.name, unit_price: best.price || undefined, unit: best.unit || undefined, currency: best.currency || 'RUB' }
         return {}
       }
-      const withMatched = scenarios.map((sc) => {
-        const items = (sc.items || []).map((it) => {
-          const m = attachMatched(it.name)
-          const unit_price = typeof m.unit_price === 'number' ? m.unit_price : undefined
-          const quantity = 1
+      const unitKey = (u?: string): 'area_m2' | 'length_m' | 'volume_m3' | 'count' | null => {
+        const s = (u || '').toLowerCase()
+        if (!s) return null
+        if (/(м2|м²)/.test(s)) return 'area_m2'
+        if (/(м3|м³)/.test(s)) return 'volume_m3'
+        if (/шт/.test(s)) return 'count'
+        if (/(п\.м|м\.п|\bм\b)/.test(s) || (/м/.test(s) && !/(м2|м²|м3|м³)/.test(s))) return 'length_m'
+        return null
+      }
+      const withMatched: Array<any> = []
+      for (const sc of scenarios) {
+        const items: Array<any> = []
+        for (const it of (sc.items || [])) {
+          let matched_name: string | undefined
+          let unit_price: number | undefined
+          let unit: string | undefined
+          let currency: string = 'RUB'
+          if (Number.isFinite(Number((it as any).price_id))) {
+            const p = await getPriceById(Number((it as any).price_id))
+            if (p) {
+              matched_name = p.name
+              unit = p.unit || undefined
+              unit_price = typeof p.price === 'number' ? p.price : undefined
+              currency = p.currency || 'RUB'
+            }
+          } else {
+            const m = attachMatched(String((it as any).name || ''))
+            matched_name = m.matched_name
+            unit = m.unit
+            unit_price = typeof m.unit_price === 'number' ? m.unit_price : undefined
+            currency = m.currency || 'RUB'
+          }
+          const key = unitKey(unit)
+          const measures = (sc.measures || {}) as Record<string, number>
+          const quantity = (typeof (it as any).quantity === 'number' && Number.isFinite((it as any).quantity))
+            ? Number((it as any).quantity)
+            : (key && typeof measures[key] === 'number' && Number.isFinite(measures[key]!))
+              ? Number(measures[key]!)
+              : 1
           const total = unit_price ? unit_price * quantity : undefined
-          return { name: it.name, matched_name: m.matched_name, unit: m.unit, unit_price, quantity, total, currency: m.currency || 'RUB' }
-        })
-        return { ...sc, items }
-      })
-      const scenarioSums = withMatched.map((sc) => (sc.items || []).reduce((acc, it) => acc + (typeof it.total === 'number' ? it.total : 0), 0))
+          items.push({ name: String((it as any).name || matched_name || ''), price_id: Number.isFinite(Number((it as any).price_id)) ? Number((it as any).price_id) : undefined, matched_name, unit, unit_price, quantity, total, currency })
+        }
+        withMatched.push({ ...sc, items })
+      }
+      const scenarioSums = withMatched.map((sc) => (sc.items || []).reduce((acc: number, it: { total?: number }) => acc + (typeof it.total === 'number' ? it.total : 0), 0))
       const sMin = Math.min(...scenarioSums.filter((x) => Number.isFinite(x)))
       const sMax = Math.max(...scenarioSums.filter((x) => Number.isFinite(x)))
       const unit = body.unit && typeof body.unit === 'string' ? body.unit : null
