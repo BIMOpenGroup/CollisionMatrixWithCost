@@ -2,10 +2,8 @@ import type { MatrixData } from './matrix'
 import type { StoredPriceRow } from './db'
 import { bulkInsertCellSuggestions, getCellKeyByIndices } from './db'
 import { llmRerank } from './llm'
-
-function normalize(s: string): string {
-  return (s || '').toLowerCase().replace(/[ё]/g, 'е')
-}
+import { normalize } from './utils/text'
+import { calculateScore } from './utils/scoring'
 
 function workTypeFromText(text: string): string | undefined {
   const t = normalize(text)
@@ -19,14 +17,8 @@ function workTypeFromText(text: string): string | undefined {
 }
 
 function scoreForCell(rowGroup: string, rowLabel: string, colGroup: string, colLabel: string, p: StoredPriceRow): number {
-  const base = normalize(`${p.name} ${p.unit || ''} ${p.category || ''}`)
-  let score = 0
-  for (const token of [rowGroup, rowLabel, colGroup, colLabel].map(normalize)) {
-    for (const t of token.split(/\s+/)) {
-      if (t && base.includes(t)) score += 0.75
-    }
-  }
-  return score
+  // Context is all 4 labels
+  return calculateScore([rowGroup, rowLabel, colGroup, colLabel], p)
 }
 
 export async function buildCellSuggestions(

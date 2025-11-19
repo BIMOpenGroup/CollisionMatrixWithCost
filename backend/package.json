@@ -16,8 +16,9 @@
     "cheerio": "1.0.0",
     "cors": "^2.8.5",
     "csv-parse": "^6.1.0",
-    "express": "^5.1.0",
+    "csv-stringify": "^6.6.0",
     "dotenv": "^16.4.5",
+    "express": "^5.1.0",
     "sqlite3": "^5.1.7",
     "undici": "6.19.8"
   },
@@ -26,9 +27,9 @@
     "@types/express": "^5.0.5",
     "@types/node": "^24.10.0",
     "nodemon": "^3.1.10",
+    "supertest": "^6.3.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "vitest": "^2.1.4",
-    "supertest": "^6.3.4"
+    "vitest": "^2.1.4"
   }
 }

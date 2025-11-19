@@ -11,6 +11,10 @@ import { buildElementSuggestions } from './elementMapping'
 import { chatCompletionOpenAICompatible, llmRerank, llmDecideCell } from './llm'
 import { buildCellSuggestions } from './cellMapping'
 
+import { getCategoryByCost } from './utils/category'
+
+import { generateMatrixCsv } from './csv'
+
 function countTable(name: string): Promise<number> {
   return new Promise((resolve, reject) => {
     db.get(`SELECT COUNT(*) AS c FROM ${name}`, (err: any, row: any) => {
@@ -36,6 +40,17 @@ export function createApp() {
       })
     } catch (e: any) {
       res.status(500).json({ error: e?.message || 'Failed to load matrix' })
+    }
+  })
+
+  app.get('/api/export/matrix', async (req, res) => {
+    try {
+      const csv = await generateMatrixCsv()
+      res.setHeader('Content-Type', 'text/csv')
+      res.setHeader('Content-Disposition', 'attachment; filename="matrix_cost.csv"')
+      res.send(csv)
+    } catch (e: any) {
+      res.status(500).send(e?.message || 'Failed to export CSV')
     }
   })
 
@@ -411,7 +426,8 @@ export function createApp() {
       const colIndex = Number(req.params.colIndex)
       if (!Number.isFinite(rowIndex) || !Number.isFinite(colIndex)) return res.status(400).json({ ok: false, error: 'rowIndex/colIndex required' })
       const row = await getCollisionCostByCell(rowIndex, colIndex)
-      res.json({ ok: true, collision: row })
+      const category = row ? getCategoryByCost(row.max || row.min || null) : null
+      res.json({ ok: true, collision: row ? { ...row, category } : null })
     } catch (e: any) {
       res.status(500).json({ ok: false, error: e?.message || 'Failed to read collision cost' })
     }
@@ -494,9 +510,10 @@ export function createApp() {
       const scenarioSums = withMatched.map((sc) => (sc.items || []).reduce((acc: number, it: { total?: number }) => acc + (typeof it.total === 'number' ? it.total : 0), 0))
       const sMin = Math.min(...scenarioSums.filter((x) => Number.isFinite(x)))
       const sMax = Math.max(...scenarioSums.filter((x) => Number.isFinite(x)))
+      const category = getCategoryByCost(Number.isFinite(sMax) ? sMax : (Number.isFinite(sMin) ? sMin : null))
       const unit = body.unit && typeof body.unit === 'string' ? body.unit : null
       await upsertCollisionCost(key.id, { unit: unit || null, min: Number.isFinite(sMin) ? sMin : null, max: Number.isFinite(sMax) ? sMax : null, scenarios_json: JSON.stringify(withMatched) })
-      res.json({ ok: true, min: Number.isFinite(sMin) ? sMin : null, max: Number.isFinite(sMax) ? sMax : null })
+      res.json({ ok: true, min: Number.isFinite(sMin) ? sMin : null, max: Number.isFinite(sMax) ? sMax : null, category })
     } catch (e: any) {
       res.status(500).json({ ok: false, error: e?.message || 'Failed to update scenarios' })
     }

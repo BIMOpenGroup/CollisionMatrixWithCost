@@ -10,7 +10,11 @@ export type MatrixData = {
   grid: string[][]
 }
 
+let cachedMatrix: MatrixData | null = null
+
 export function loadMatrixFromCsv(): MatrixData {
+  if (cachedMatrix) return cachedMatrix
+
   const frontendCsv = path.resolve(__dirname, '../../frontend/public/matrix.csv')
   const exampleCsv = path.resolve(__dirname, '../../example/Матрица коллизий v2 - Лист1.csv')
   const csvPath = fs.existsSync(frontendCsv) ? frontendCsv : exampleCsv
@@ -65,7 +69,8 @@ export function loadMatrixFromCsv(): MatrixData {
     grid.push(normalized)
   }
 
-  return { columns, rows, grid }
+  cachedMatrix = { columns, rows, grid }
+  return cachedMatrix
 }
 
 export function extractDisciplineGroups(matrix: MatrixData): {

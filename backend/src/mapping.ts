@@ -1,6 +1,8 @@
 import type { StoredPriceRow } from './db'
 import { bulkInsertMappingSuggestions } from './db'
 import { llmRerank } from './llm'
+import { normalize } from './utils/text'
+import { calculateScore } from './utils/scoring'
 
 const DISCIPLINE_KEYWORDS: Record<string, string[]> = {
   'АР': ['архитектур', 'отделоч', 'проем', 'перегород', 'двер', 'окн'],
@@ -12,26 +14,16 @@ const DISCIPLINE_KEYWORDS: Record<string, string[]> = {
   'АУПТ': ['пожаротуш', 'спринклер', 'пена', 'вода', 'магистраль', 'насос'],
 }
 
-function normalize(str: string): string {
-  return str.toLowerCase().replace(/[ё]/g, 'е')
-}
-
 function scorePriceForDiscipline(discipline: string, p: StoredPriceRow): number {
-  const name = normalize(p.name)
-  const unit = normalize(p.unit || '')
-  const category = normalize(p.category || '')
-  const base = name + ' ' + unit + ' ' + category
-  const keys = DISCIPLINE_KEYWORDS[discipline] || []
-  let score = 0
-  for (const k of keys) {
-    if (base.includes(k)) score += 1
-  }
-  // small boost if category looks relevant by common stems
-  if (discipline === 'ОВ' && /вент|отоп|конди/i.test(base)) score += 0.5
-  if (discipline === 'ВК' && /вод|канал/i.test(base)) score += 0.5
-  if (discipline === 'КР' && /бетон|армир|монолит/i.test(base)) score += 0.5
-  if (discipline === 'ЭО' && /элект|кабель|щит/i.test(base)) score += 0.5
-  return score
+  return calculateScore([], p, {
+    keywords: DISCIPLINE_KEYWORDS[discipline],
+    contextKeywords: {
+      'ОВ': ['вент', 'отоп', 'конди'],
+      'ВК': ['вод', 'канал'],
+      'КР': ['бетон', 'армир', 'монолит'],
+      'ЭО': ['элект', 'кабель', 'щит']
+    }
+  })
 }
 
 export type SuggestionCandidate = { price: StoredPriceRow; score: number }

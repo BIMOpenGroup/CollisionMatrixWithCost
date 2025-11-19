@@ -2,10 +2,8 @@ import type { MatrixData } from './matrix'
 import type { StoredPriceRow } from './db'
 import { bulkInsertElementSuggestions } from './db'
 import { llmRerank } from './llm'
-
-function normalize(s: string): string {
-  return (s || '').toLowerCase().replace(/[ё]/g, 'е')
-}
+import { normalize } from './utils/text'
+import { calculateScore } from './utils/scoring'
 
 const GROUP_KEYWORDS: Record<string, string[]> = {
   'АР': ['архитект', 'отдел', 'стен', 'окн', 'двер', 'кровл', 'потол'],
@@ -43,20 +41,11 @@ const ELEMENT_KEYWORDS: Record<string, string[]> = {
 }
 
 function scoreForElement(group: string, element: string, p: StoredPriceRow): number {
-  const base = normalize(`${p.name} ${p.unit || ''} ${p.category || ''}`)
-  let score = 0
-
-  const eKeys = ELEMENT_KEYWORDS[element] || []
-  for (const k of eKeys) if (base.includes(k)) score += 1
-
-  const gKeys = GROUP_KEYWORDS[group] || []
-  for (const k of gKeys) if (base.includes(k)) score += 0.5
-
-  // Lightweight name-token matching from element string itself
-  for (const token of normalize(element).split(/[\s\/]+/)) {
-    if (token && base.includes(token)) score += 0.5
-  }
-  return score
+  // Combine element name tokens as base context
+  // And use GROUP/ELEMENT keywords as boosts
+  return calculateScore(element, p, {
+    keywords: [...(ELEMENT_KEYWORDS[element] || []), ...(GROUP_KEYWORDS[group] || [])]
+  })
 }
 
 export async function buildElementSuggestions(

@@ -1,34 +1,13 @@
 import { load } from 'cheerio'
 import { fetch } from 'undici'
 import { PriceRow } from './db'
+import { normalize, parsePrice } from './utils/text'
 
 const SOURCE_HOST = 'garantstroikompleks.ru'
 const SOURCE_PAGE = 'https://garantstroikompleks.ru/prajs-list'
 
-function norm(s: string): string {
-  return (s || '')
-    .replace(/\u00A0/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-}
-
-function parsePriceCell(text: string): number | undefined {
-  const raw = norm(text)
-  if (!raw) return undefined
-  // Extract first decimal number, allow comma as decimal separator
-  const m = raw.match(/[0-9]+(?:[\s\.,][0-9]{3})*(?:[\.,][0-9]+)?/)
-  if (!m) return undefined
-  const num = m[0]
-  const cleaned = num
-    .replace(/\s/g, '')
-    .replace(/\.(?=\d{3}(\D|$))/g, '') // remove thousands dot separators
-    .replace(/,(?=\d{2,})/g, '.') // convert decimal comma to dot
-  const parsed = Number(cleaned)
-  return Number.isFinite(parsed) ? parsed : undefined
-}
-
 function headerToKey(h: string): string | undefined {
-  const s = norm(h).toLowerCase()
+  const s = normalize(h).toLowerCase()
   if (!s) return undefined
   if (s.includes('наимен') || s.includes('работ') || s.includes('услуг')) return 'name'
   if (s.includes('ед') || s.includes('измер')) return 'unit'
@@ -54,7 +33,7 @@ export async function scrapeGarantPrices(): Promise<PriceRow[]> {
   // Determine category by nearest preceding header before each table
   function tableCategory($table: any): string | undefined {
     const prevHeader = $table.prevAll('h1, h2, h3, h4, h5').first()
-    const cat = norm(prevHeader.text())
+    const cat = normalize(prevHeader.text())
     return cat || undefined
   }
 
@@ -69,7 +48,7 @@ export async function scrapeGarantPrices(): Promise<PriceRow[]> {
       $headerRow = $table.find('tr').first()
     }
     $headerRow.find('th, td').each((__, h) => {
-      headerCells.push(norm($(h).text()))
+      headerCells.push(normalize($(h).text()))
     })
 
     const keys = headerCells.map(headerToKey)
@@ -94,11 +73,11 @@ export async function scrapeGarantPrices(): Promise<PriceRow[]> {
       }
       cells.each((i, td) => {
         const key = keys[i]
-        const text = norm($(td).text())
+        const text = normalize($(td).text())
         if (!text) return
         if (key === 'name') rec.name = text
         else if (key === 'unit') rec.unit = text
-        else if (key === 'price') rec.price = parsePriceCell(text)
+        else if (key === 'price') rec.price = parsePrice(text)
       })
 
       if (rec.name) {
