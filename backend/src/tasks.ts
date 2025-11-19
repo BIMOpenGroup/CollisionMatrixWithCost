@@ -77,6 +77,22 @@ async function runAutoApproveElements(taskId: number) {
           const price = await getPriceById(d.price_id!)
           await insertSuggestionEvent({ type: 'element', suggestion_id: sugId, action: d.action === 'accept' ? 'accepted' : 'rejected', price_id: d.price_id || suggestions.find((s) => s.id === sugId)?.price_id || 0, grp: t.grp, element: t.element, axis: t.axis, source: price?.source || null, source_page: price?.source_page || null })
         }
+      } else if (suggestions.length) {
+        const sorted = suggestions
+          .map((s) => ({ s, score: typeof s.score === 'number' ? s.score : -Infinity }))
+          .sort((a, b) => b.score - a.score)
+        const best = sorted[0]?.s
+        if (best) {
+          await updateElementSuggestionStatus(best.id, 'accepted')
+          const price = await getPriceById(best.price_id)
+          await insertSuggestionEvent({ type: 'element', suggestion_id: best.id, action: 'accepted', price_id: best.price_id, grp: t.grp, element: t.element, axis: t.axis, source: price?.source || null, source_page: price?.source_page || null })
+        }
+        for (const entry of sorted.slice(1)) {
+          const s = entry.s
+          await updateElementSuggestionStatus(s.id, 'rejected')
+          const price = await getPriceById(s.price_id)
+          await insertSuggestionEvent({ type: 'element', suggestion_id: s.id, action: 'rejected', price_id: s.price_id, grp: t.grp, element: t.element, axis: t.axis, source: price?.source || null, source_page: price?.source_page || null })
+        }
       }
       processed++
       if (processed % 20 === 0) {
