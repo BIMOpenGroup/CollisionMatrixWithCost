@@ -1,5 +1,3 @@
-import { Fragment } from 'react'
-
 type Task = { id: number; type: string; status: string; progress: number; message?: string }
 type Log = { ts: string; level: string; message?: string }
 

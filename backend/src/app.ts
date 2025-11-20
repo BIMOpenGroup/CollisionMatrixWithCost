@@ -425,9 +425,13 @@ export function createApp() {
       const rowIndex = Number(req.params.rowIndex)
       const colIndex = Number(req.params.colIndex)
       if (!Number.isFinite(rowIndex) || !Number.isFinite(colIndex)) return res.status(400).json({ ok: false, error: 'rowIndex/colIndex required' })
-      const matrix = loadMatrixFromCsv()
-      const baseVal = matrix.grid?.[rowIndex]?.[colIndex]
-      if (baseVal === 'Д' || baseVal === 'N/A') return res.json({ ok: true, collision: null })
+      const gate = process.env.CSV_GATE_ENABLED !== '0'
+      if (gate) {
+        const matrix = loadMatrixFromCsv()
+        const baseVal = matrix.grid?.[rowIndex]?.[colIndex]
+        const s = (baseVal || '').trim().toUpperCase()
+        if (s === 'Д' || s === 'N/A') return res.json({ ok: true, collision: null, skipped: true })
+      }
       const row = await getCollisionCostByCell(rowIndex, colIndex)
       const category = row ? getCategoryByCost(row.max || row.min || null) : null
       res.json({ ok: true, collision: row ? { ...row, category } : null })
@@ -443,9 +447,13 @@ export function createApp() {
       const body = typeof req.body === 'object' && req.body ? req.body : {}
       const scenarios: Array<{ scenario: string; rationale?: string; measures?: Record<string, number>; items?: Array<{ name?: string; price_id?: number; quantity?: number }> }> = Array.isArray(body.scenarios) ? body.scenarios : []
       if (!Number.isFinite(rowIndex) || !Number.isFinite(colIndex)) return res.status(400).json({ ok: false, error: 'rowIndex/colIndex required' })
-      const matrix = loadMatrixFromCsv()
-      const baseVal = matrix.grid?.[rowIndex]?.[colIndex]
-      if (baseVal === 'Д' || baseVal === 'N/A') return res.json({ ok: true, skipped: true, min: null, max: null, category: null })
+      const gate = process.env.CSV_GATE_ENABLED !== '0'
+      if (gate) {
+        const matrix = loadMatrixFromCsv()
+        const baseVal = matrix.grid?.[rowIndex]?.[colIndex]
+        const s = (baseVal || '').trim().toUpperCase()
+        if (s === 'Д' || s === 'N/A') return res.json({ ok: true, skipped: true, min: null, max: null, category: null })
+      }
       const key = await getCellKeyByIndices(rowIndex, colIndex)
       if (!key) return res.status(404).json({ ok: false, error: 'Cell not found' })
       const prices = await getPrices(10000)
@@ -553,7 +561,16 @@ export function createApp() {
       const colIndex = Number(req.params.colIndex)
       if (!Number.isFinite(rowIndex) || !Number.isFinite(colIndex)) return res.status(400).json({ ok: false, error: 'rowIndex/colIndex required' })
       const payload = await getCalcItemsByCell(rowIndex, colIndex)
-      res.json({ ok: true, ...payload })
+      const sum = (arr: Array<{ price?: number }>) => arr.reduce((acc, it) => acc + (typeof it.price === 'number' ? it.price : 0), 0)
+      const currencyOf = (arr: Array<{ currency?: string }>) => {
+        const vals = Array.from(new Set(arr.map((i) => (i.currency || 'RUB').toUpperCase())))
+        return vals.length === 1 ? vals[0] : 'MIX'
+      }
+      const row_total = sum(payload.rowItems)
+      const col_total = sum(payload.colItems)
+      const row_currency = currencyOf(payload.rowItems)
+      const col_currency = currencyOf(payload.colItems)
+      res.json({ ok: true, ...payload, row_total, col_total, row_currency, col_currency })
     } catch (e: any) {
       res.status(500).json({ ok: false, error: e?.message || 'Failed to read calc items' })
     }
@@ -562,13 +579,18 @@ export function createApp() {
   app.get('/api/cells/summary', async (req, res) => {
     try {
       const rows = await getCellSummary()
-      const matrix = loadMatrixFromCsv()
-      const patched = rows.map((r: any) => {
-        const baseVal = matrix.grid?.[r.row_index]?.[r.col_index]
-        if (baseVal === 'Д' || baseVal === 'N/A') return { ...r, min: null, max: null, sum: null, unit: null }
-        return r
-      })
-      res.json({ ok: true, summary: patched, total: patched.length })
+      const gate = process.env.CSV_GATE_ENABLED !== '0'
+      if (gate) {
+        const matrix = loadMatrixFromCsv()
+        const patched = rows.map((r: any) => {
+          const baseVal = matrix.grid?.[r.row_index]?.[r.col_index]
+          const s = (baseVal || '').trim().toUpperCase()
+          if (s === 'Д' || s === 'N/A') return { ...r, min: null, max: null, sum: null, unit: null }
+          return r
+        })
+        return res.json({ ok: true, summary: patched, total: patched.length })
+      }
+      res.json({ ok: true, summary: rows, total: rows.length })
     } catch (e: any) {
       res.status(500).json({ ok: false, error: e?.message || 'Failed to read cell summary' })
     }

@@ -10,7 +10,7 @@ export default function CostMatrixTab({ data }: { data: MatrixResponse }) {
   const [cellWorkType, setCellWorkType] = useState('')
   const [cellSug, setCellSug] = useState<Array<{ id: number; price_id: number; price_name?: string; price_unit?: string; price_category?: string; price_source?: string; price_source_page?: string; score?: number; status?: 'proposed' | 'accepted' | 'rejected'; work_type?: string }>>([])
   const [cellItems, setCellItems] = useState<Array<{ id: number; price_id: number; quantity?: number; unit_price?: number; currency?: string; total?: number; source?: string; source_page?: string; work_type?: string }>>([])
-  const [calcItems, setCalcItems] = useState<{ row: Array<{ name?: string; unit?: string; price?: number; currency?: string }>; col: Array<{ name?: string; unit?: string; price?: number; currency?: string }> } | null>(null)
+  const [calcItems, setCalcItems] = useState<{ row: Array<{ name?: string; unit?: string; price?: number; currency?: string }>; col: Array<{ name?: string; unit?: string; price?: number; currency?: string }>; row_total?: number; col_total?: number; row_currency?: string; col_currency?: string } | null>(null)
   const [collisionInfo, setCollisionInfo] = useState<{ unit?: string; min?: number; max?: number; scenarios?: Array<{ scenario: string; rationale?: string; items?: Array<{ price_id?: number; name: string; matched_name?: string; unit?: string; unit_price?: number; quantity?: number; total?: number; currency?: string }> }> } | null>(null)
   const [scenariosUi, setScenariosUi] = useState<Array<{ scenario: string; rationale?: string; items: Array<{ price_id?: number; name: string; quantity: number }> }>>([])
   const [editMode, setEditMode] = useState(false)
@@ -154,7 +154,7 @@ export default function CostMatrixTab({ data }: { data: MatrixResponse }) {
                                   setScenariosUi((Array.isArray(sc) ? sc : []).map((s: any) => ({ scenario: String(s?.scenario || ''), rationale: typeof s?.rationale === 'string' ? s.rationale : undefined, items: Array.isArray(s?.items) ? s.items.map((it: any) => ({ price_id: typeof it?.price_id === 'number' ? it.price_id : undefined, name: String(it?.name || it?.matched_name || ''), quantity: typeof it?.quantity === 'number' ? it.quantity : 1 })) : [] })))
                                   setEditMode(false)
                                 })
-                                fetch(`http://localhost:3001/api/cells/${ri}/${ciAbs}/calc-items`).then((r) => r.json()).then((j) => setCalcItems({ row: (j?.rowItems || []) as any, col: (j?.colItems || []) as any }))
+                                fetch(`http://localhost:3001/api/cells/${ri}/${ciAbs}/calc-items`).then((r) => r.json()).then((j) => setCalcItems({ row: (j?.rowItems || []) as any, col: (j?.colItems || []) as any, row_total: typeof j?.row_total === 'number' ? j.row_total : undefined, col_total: typeof j?.col_total === 'number' ? j.col_total : undefined, row_currency: typeof j?.row_currency === 'string' ? j.row_currency : undefined, col_currency: typeof j?.col_currency === 'string' ? j.col_currency : undefined }))
                               }} title={`Σ ${display}${unit ? ` ${unit}` : ''}`}>{display}</td>
                             )
                           })}
@@ -181,6 +181,13 @@ export default function CostMatrixTab({ data }: { data: MatrixResponse }) {
             <div className="panel">
               <div className="sub">Оценка коллизий</div>
               <div className="sub">Диапазон: {typeof collisionInfo.min === 'number' ? collisionInfo.min.toFixed(2) : '—'}–{typeof collisionInfo.max === 'number' ? collisionInfo.max.toFixed(2) : '—'} {collisionInfo.unit || ''}</div>
+              <div className="sub">Затраты считаются по элементу строки</div>
+              {calcItems && (
+                <>
+                  <div className="sub">Затраты (корректируется строка): {typeof calcItems.row_total === 'number' ? calcItems.row_total.toFixed(2) : '—'} {calcItems.row_currency || 'RUB'}</div>
+                  <div className="sub">Затраты (корректируется колонка): {typeof calcItems.col_total === 'number' ? calcItems.col_total.toFixed(2) : '—'} {calcItems.col_currency || 'RUB'}</div>
+                </>
+              )}
               <div className="actions">
                 <button title="Открыть/закрыть редактор сценариев" onClick={() => setEditMode((v) => !v)}>{editMode ? 'Закрыть редактор' : 'Редактировать сценарии'}</button>
                 {editMode && (
